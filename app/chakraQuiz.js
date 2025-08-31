@@ -475,70 +475,56 @@ export function initChakraQuiz(containerId) {
   `;
   document.head.appendChild(style);
 
-  // Quiz Daten - Neue detaillierte Chakra Fragen
+  // Chakra Quiz Fragen (35, ENGLISCH)
   const questions = [
-    // Wurzelchakra (1)
-    { q: 'Ich fühle mich in meinem Körper sicher und wohl.', chakra: 1 },
-    { q: 'Ich habe das Gefühl, dass meine Grundbedürfnisse (z.B. Wohnen, Nahrung, Sicherheit) erfüllt sind.', chakra: 1 },
-    { q: 'In Stresssituationen bleibe ich ruhig und gelassen.', chakra: 1 },
-    { q: 'Ich habe ein stabiles Umfeld, auf das ich mich verlassen kann.', chakra: 1 },
-    { q: 'Mir fällt es leicht, mich zu erden und im Hier und Jetzt zu bleiben.', chakra: 1 },
-    { q: 'Veränderungen in meinem Leben machen mir keine Angst.', chakra: 1 },
-    { q: 'Ich kann gut für mich selbst sorgen und meine Grenzen wahren.', chakra: 1 },
+    // First chakra (5)
+    { q: "The nuclear family gives me a strong sense of security and stability, and I cannot actually imagine myself without it. The best thing in the world is to come back, at the end of each day, to the family nest.", chakra: 1 },
+    { q: "Laws, moral codes and societal or religious order give me a strong sense of inner order and relaxation. I feel good when everyone obeys the law and follows moral codes. The world feels right when it functions with the correct structures and with orderly behavior.", chakra: 1 },
+    { q: "I could easily and happily manage the same stable routines and the same life structures for the rest of my life—including the fixed hours and the fixed cycles of activity and rest. Basically, I prefer the life that I am familiar with, and I am not inclined toward intense and radical adventures that might disrupt this familiar life. I also like dealing with the small details of life, and I’m quite patient when doing that.", chakra: 1 },
+    { q: "I feel a deep and fundamental connection to my parents and my entire family lineage, to my land and my country, and to the tradition and the mentality into which I was born (or to any one of them in particular).", chakra: 1 },
+    { q: "I am capable of working for long periods of time (at least for two or three years) at an unexciting job, as long as the general conditions are good and there is a generous and stable income.", chakra: 1 },
 
-    // Sakralchakra (2)
-    { q: 'Ich kann meine Gefühle frei zulassen und ausdrücken.', chakra: 2 },
-    { q: 'Genuss, Sinnlichkeit und Lebensfreude sind feste Bestandteile meines Alltags.', chakra: 2 },
-    { q: 'Ich habe ein gesundes Verhältnis zu Sexualität und Intimität.', chakra: 2 },
-    { q: 'Ich bin offen für kreative Ideen und probiere gerne Neues aus.', chakra: 2 },
-    { q: 'Ich kann Nähe zulassen und vertrauensvolle Beziehungen eingehen.', chakra: 2 },
-    { q: 'Ich gehe flexibel mit Veränderungen und Herausforderungen um.', chakra: 2 },
-    { q: 'Ich kann gut zwischen meinen eigenen Gefühlen und denen anderer unterscheiden.', chakra: 2 },
+    // Second chakra (5)
+    { q: "Sex is a divine experience for me. It is among the greatest peak experiences of life. Sexual experiences are, in a way, my gateway to spiritual elevation and even transcendence.", chakra: 2 },
+    { q: "I love exciting and thrilling experiences. I love going on surprising adventures, and even being on the verge of real danger. I love the sensation of ‘adrenalin’ in my body.", chakra: 2 },
+    { q: "I can’t spend even one day without experiencing some sort of intense pleasure, or a sensual and stimulating experience (such as a powerful sexual orgasm, dancing, hiking, nude-swimming, unrestrained humor, intense laughter, mischievousness, unruly behavior, wildness of any kind or even ‘law-breaking’).", chakra: 2 },
+    { q: "I experience life through powerful sensations. Life, for me, is a sensual and even erotic realm, and I feel like devouring every sensual opportunity in sight.", chakra: 2 },
+    { q: "There are many social taboos that I would like to break and many ‘forbidden fruits’ that I would like to taste in my lifetime—and I definitely intend on doing so!", chakra: 2 },
 
-    // Solarplexuschakra (3)
-    { q: 'Ich habe ein gesundes Selbstbewusstsein und weiß, was ich kann.', chakra: 3 },
-    { q: 'Ich setze meine Ziele entschlossen um und lasse mich nicht leicht entmutigen.', chakra: 3 },
-    { q: 'Ich kann meine Meinung vertreten, auch wenn sie nicht der Mehrheit entspricht.', chakra: 3 },
-    { q: 'Ich übernehme Verantwortung für mein Handeln und meine Entscheidungen.', chakra: 3 },
-    { q: 'Ich habe die Kraft, auch in schwierigen Situationen durchzuhalten.', chakra: 3 },
-    { q: 'Ich erkenne meine eigenen Grenzen und respektiere sie.', chakra: 3 },
-    { q: 'Ich kann Kritik annehmen und als Chance zur Weiterentwicklung sehen.', chakra: 3 },
+    // Third chakra (5)
+    { q: "I love the feeling of achievement I get from conquering goals. For me, to be alive and to breathe means to constantly set goals before my eyes; whenever I reach a goal, I go for a new, more ambitious and advanced destination. I love the feeling of reaching a goal and then targeting another.", chakra: 3 },
+    { q: "I am a strong and opinionated individual. I have very well defined ideas and worldviews. I firmly stand for my beliefs, and I will not let anyone convince me otherwise or make me give up my beliefs.", chakra: 3 },
+    { q: "I have a tremendous amount of energy, and so am able to follow missions that I strongly trust and believe in, I’m capable of persevering and enduring, even when my body becomes tired. When following these missions, my self-discipline will never allow me to give in to weakness and exhaustion. I usually end my work-days with a strong sense of intensity and achievement. I could go on and on, into the night if no one stopped me.", chakra: 3 },
+    { q: "I believe that a man is measured by what he does and by his marked achievements—by what he leaves behind him at the end of his life.", chakra: 3 },
+    { q: "I have a strong feeling that everything depends on me and lies completely on my shoulders. For this reason, I like to centralize power and tasks and organize them all by myself.", chakra: 3 },
 
-    // Herzchakra (4)
-    { q: 'Ich kann Liebe und Mitgefühl für mich selbst empfinden.', chakra: 4 },
-    { q: 'Ich bin offen für die Gefühle anderer und kann mich gut in sie hineinversetzen.', chakra: 4 },
-    { q: 'Ich kann anderen Menschen vergeben und alte Verletzungen loslassen.', chakra: 4 },
-    { q: 'Ich pflege harmonische und unterstützende Beziehungen.', chakra: 4 },
-    { q: 'Ich fühle mich mit anderen Menschen tief verbunden.', chakra: 4 },
-    { q: 'Ich kann sowohl geben als auch empfangen, ohne mich dabei auszubeuten.', chakra: 4 },
-    { q: 'Ich bin bereit, mein Herz zu öffnen, auch wenn ich schon verletzt wurde.', chakra: 4 },
+    // Fourth chakra (5)
+    { q: "Emotions and relationships are the central theme in my daily thoughts.", chakra: 4 },
+    { q: "In my mind, love—the experience of love and the realization of love—is the meaning and purpose of life; it is the supreme value and the highest destination.", chakra: 4 },
+    { q: "Without the fulfillment of a deep romantic love, I will feel that my life lacks logic and meaning. The union between another and me gives meaning to everything.", chakra: 4 },
+    { q: "The peak moments of my life were times when I shared profound intimacy and emotional vulnerability with other people, animals or God.", chakra: 4 },
+    { q: "In my mind, love is the power that can save the world and change it for the better. Deep healing through love is the only real thing that this world needs.", chakra: 4 },
 
-    // Halschakra (5)
-    { q: 'Ich kann meine Gedanken und Gefühle klar und ehrlich ausdrücken.', chakra: 5 },
-    { q: 'Ich traue mich, auch unangenehme Wahrheiten auszusprechen.', chakra: 5 },
-    { q: 'Ich höre anderen aufmerksam zu und lasse sie ausreden.', chakra: 5 },
-    { q: 'Ich finde die richtigen Worte, um meine Anliegen zu vermitteln.', chakra: 5 },
-    { q: 'Ich kann meine Bedürfnisse und Grenzen klar kommunizieren.', chakra: 5 },
-    { q: 'Ich habe Freude daran, mich kreativ auszudrücken (z.B. durch Schreiben, Singen, Malen).', chakra: 5 },
-    { q: 'Ich stehe zu meiner Meinung, auch wenn sie nicht populär ist.', chakra: 5 },
+    // Fifth chakra (5)
+    { q: "From my direct experience and from other people’s feedback I have learned that, when I talk to people, I magnetize, enrapture and influence them very strongly. It seems that I possess a high capacity to convince and influence those around me.", chakra: 5 },
+    { q: "I can easily explain and interpret complex ideas in a very accessible and effective way. It seems that I can help others understand things that don’t belong to their ordinary field of knowledge.", chakra: 5 },
+    { q: "I excel in manifesting and materializing ideas and initiatives. There is a long list of ideas and initiatives that I have managed to realize and fulfill. I also have many plans in my mind that are waiting to be fulfilled in the future.", chakra: 5 },
+    { q: "For me, the most important thing in the world is to succeed in voicing the truths I believe in. I am hoping to influence others in this way. I have a tremendous urge to express myself clearly and powerfully. It is like an engine that ceaselessly works and roars inside of me.", chakra: 5 },
+    { q: "It is clear to me that I am capable of leading people toward the fulfillment of ideas that I believe in. It seems like the most natural thing for me is to guide and teach others.", chakra: 5 },
 
-    // Stirnchakra (6)
-    { q: 'Ich vertraue auf meine Intuition und innere Stimme.', chakra: 6 },
-    { q: 'Ich habe eine klare Vorstellung davon, wohin mein Leben gehen soll.', chakra: 6 },
-    { q: 'Ich kann Zusammenhänge und Muster schnell erkennen.', chakra: 6 },
-    { q: 'Ich lasse mich von meiner Vision leiten und verliere sie nicht aus den Augen.', chakra: 6 },
-    { q: 'Ich kann zwischen Fantasie und Realität unterscheiden.', chakra: 6 },
-    { q: 'Ich bin offen für neue Perspektiven und Sichtweisen.', chakra: 6 },
-    { q: 'Ich nehme feine Impulse und Stimmungen in meinem Umfeld wahr.', chakra: 6 },
+    // Sixth chakra (5)
+    { q: "Understanding how things work and why they work this way is my deepest urge in life. The central themes in my thoughts are universal questions, which are all motivated by my urge to decipher the laws behind the universe.", chakra: 6 },
+    { q: "The most admirable role models in my mind are philosophers, inventors, researchers and other people who have managed to penetrate the mysteries of the universe through their wisdom and their inquiring minds. I follow in their footsteps by trying to develop insight into the nature of the universe.", chakra: 6 },
+    { q: "The things that give me the highest ecstasy are brilliant mental structures, perfect and wholesome ideas, wise models and ladders of development and sublime mental orders that accurately copy the subtle harmonies of the cosmos.", chakra: 6 },
+    { q: "Ever since I can remember, there was something in me that remained uninvolved, observing the world and humans as if from afar, and inquiring into their customs and habits. Quite often, this impersonal, detached and sometimes even arrogant observation seems stronger than life itself.", chakra: 6 },
+    { q: "Whenever a strong emotion appears inside of me, I am not interested in experiencing and feeling it, but I am interested in investigating it, as if I am a scientist observing a phenomenon in my lab. I passionately examine its more universal aspects, its dynamics and the general, impersonal insight that is concealed within it.", chakra: 6 },
 
-    // Kronenchakra (7)
-    { q: 'Ich fühle mich mit dem Leben und dem Universum verbunden.', chakra: 7 },
-    { q: 'Ich habe Vertrauen darin, dass alles im Leben einen Sinn hat.', chakra: 7 },
-    { q: 'Ich finde in der Stille und im Alleinsein inneren Frieden.', chakra: 7 },
-    { q: 'Ich bin offen für spirituelle Erfahrungen und Erkenntnisse.', chakra: 7 },
-    { q: 'Ich kann mich für das „Große Ganze“ öffnen und loslassen.', chakra: 7 },
-    { q: 'Ich habe das Gefühl, dass es mehr gibt als das Sichtbare und Materielle.', chakra: 7 },
-    { q: 'Ich lasse mich vom Leben führen und vertraue auf höhere Weisheit.', chakra: 7 },
+    // Seventh chakra (5)
+    { q: "Without any difficulty or doubt I could renounce the world and move into a cave for full-time meditation or join some spiritual order for the rest of my life. When abandoning the world I wouldn’t feel any desire to return and fulfill missed opportunities.", chakra: 7 },
+    { q: "The subtle melting down of personal barriers is, for me, the supreme type of fulfillment and, in fact, the only type of fulfillment. Everything else is completely secondary and pales in significance.", chakra: 7 },
+    { q: "Observation of silence, fasts, solitude, retreats and very long meditation practices are very natural for me, and I tend to practice them quite often.", chakra: 7 },
+    { q: "Sexuality, romantic partnerships, family, self-fulfillment, advancement in life and achievements of any kind trouble my thoughts very little, if at all.", chakra: 7 },
+    { q: "The heavenly and spiritual realms are my true home, and I feel that, in a way, I did not originate from this earth. I carry the feeling with me daily that I actually abide in realms that are very far from the visible world, and that I’m only a guest in the material dimension.", chakra: 7 },
   ];
 
   const chakraColors = {
