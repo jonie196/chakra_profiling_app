@@ -1,9 +1,21 @@
+  // Chakra personality mapping (A-G)
+  const chakraMapping = {
+    a: "Root chakra type (Builder)",
+    b: "Sacral chakra type (Artist)",
+    c: "Solar plexus chakra type (Achiever)",
+    d: "Heart chakra type (Caretaker)",
+    e: "Throat chakra type (Speaker)",
+    f: "Third eye chakra type (Thinker)",
+    g: "Crown chakra type (Yogi)"
+  };
 // chakraQuiz.js
 import { Chart, registerables } from 'chart.js';
 import jsPDF from 'jspdf';
 Chart.register(...registerables);
 
 export function initChakraQuiz(containerId) {
+  // Ensure this runs only in the browser (not SSR)
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
   const container = document.getElementById(containerId);
   if (!container) return console.error('Container not found');
 
@@ -40,26 +52,21 @@ export function initChakraQuiz(containerId) {
   const answersDiv = document.createElement('div');
   answersDiv.className = 'answers';
 
-  const btn3 = document.createElement('button');
-  btn3.id = 'btn3';
-  btn3.textContent = '✅ Zutreffend';
-
-  const btn2 = document.createElement('button');
-  btn2.id = 'btn2';
-  btn2.textContent = '👍 Eher zutreffend';
-
-  const btn1 = document.createElement('button');
-  btn1.id = 'btn1';
-  btn1.textContent = '👎 Eher nicht zutreffend';
-
-  const btn0 = document.createElement('button');
-  btn0.id = 'btn0';
-  btn0.textContent = '❌ Nicht zutreffend';
-
-  answersDiv.appendChild(btn3);
-  answersDiv.appendChild(btn2);
-  answersDiv.appendChild(btn1);
-  answersDiv.appendChild(btn0);
+  // Dynamically generate answer buttons based on current question's answers (a-g)
+  function renderAnswerButtons() {
+    answersDiv.innerHTML = '';
+    const q = shuffledQuestions[currentIndex];
+    if (!q || !q.answers) return;
+    q.answers.forEach((answerText, idx) => {
+      const btn = document.createElement('button');
+      btn.id = `btn${idx}`;
+      btn.textContent = answerText;
+      // The answerText is e.g. "a) ...", so extract the letter for mapping
+      // But since all questions have answers a-g in order, idx maps directly to chakra 1-7
+      btn.addEventListener('click', () => answer(idx));
+      answersDiv.appendChild(btn);
+    });
+  }
 
   // Add headline and desc above progress bar
   quizDiv.appendChild(quizHeadline);
@@ -475,57 +482,350 @@ export function initChakraQuiz(containerId) {
   `;
   document.head.appendChild(style);
 
-  // Chakra Quiz Fragen (35, ENGLISCH)
+  // Chakra Quiz Fragen (25, 7 Antwortoptionen a-g, Mapping: a=1, b=2, c=3, d=4, e=5, f=6, g=7)
   const questions = [
-    // First chakra (5)
-    { q: "The nuclear family gives me a strong sense of security and stability, and I cannot actually imagine myself without it. The best thing in the world is to come back, at the end of each day, to the family nest.", chakra: 1 },
-    { q: "Laws, moral codes and societal or religious order give me a strong sense of inner order and relaxation. I feel good when everyone obeys the law and follows moral codes. The world feels right when it functions with the correct structures and with orderly behavior.", chakra: 1 },
-    { q: "I could easily and happily manage the same stable routines and the same life structures for the rest of my life—including the fixed hours and the fixed cycles of activity and rest. Basically, I prefer the life that I am familiar with, and I am not inclined toward intense and radical adventures that might disrupt this familiar life. I also like dealing with the small details of life, and I’m quite patient when doing that.", chakra: 1 },
-    { q: "I feel a deep and fundamental connection to my parents and my entire family lineage, to my land and my country, and to the tradition and the mentality into which I was born (or to any one of them in particular).", chakra: 1 },
-    { q: "I am capable of working for long periods of time (at least for two or three years) at an unexciting job, as long as the general conditions are good and there is a generous and stable income.", chakra: 1 },
-
-    // Second chakra (5)
-    { q: "Sex is a divine experience for me. It is among the greatest peak experiences of life. Sexual experiences are, in a way, my gateway to spiritual elevation and even transcendence.", chakra: 2 },
-    { q: "I love exciting and thrilling experiences. I love going on surprising adventures, and even being on the verge of real danger. I love the sensation of ‘adrenalin’ in my body.", chakra: 2 },
-    { q: "I can’t spend even one day without experiencing some sort of intense pleasure, or a sensual and stimulating experience (such as a powerful sexual orgasm, dancing, hiking, nude-swimming, unrestrained humor, intense laughter, mischievousness, unruly behavior, wildness of any kind or even ‘law-breaking’).", chakra: 2 },
-    { q: "I experience life through powerful sensations. Life, for me, is a sensual and even erotic realm, and I feel like devouring every sensual opportunity in sight.", chakra: 2 },
-    { q: "There are many social taboos that I would like to break and many ‘forbidden fruits’ that I would like to taste in my lifetime—and I definitely intend on doing so!", chakra: 2 },
-
-    // Third chakra (5)
-    { q: "I love the feeling of achievement I get from conquering goals. For me, to be alive and to breathe means to constantly set goals before my eyes; whenever I reach a goal, I go for a new, more ambitious and advanced destination. I love the feeling of reaching a goal and then targeting another.", chakra: 3 },
-    { q: "I am a strong and opinionated individual. I have very well defined ideas and worldviews. I firmly stand for my beliefs, and I will not let anyone convince me otherwise or make me give up my beliefs.", chakra: 3 },
-    { q: "I have a tremendous amount of energy, and so am able to follow missions that I strongly trust and believe in, I’m capable of persevering and enduring, even when my body becomes tired. When following these missions, my self-discipline will never allow me to give in to weakness and exhaustion. I usually end my work-days with a strong sense of intensity and achievement. I could go on and on, into the night if no one stopped me.", chakra: 3 },
-    { q: "I believe that a man is measured by what he does and by his marked achievements—by what he leaves behind him at the end of his life.", chakra: 3 },
-    { q: "I have a strong feeling that everything depends on me and lies completely on my shoulders. For this reason, I like to centralize power and tasks and organize them all by myself.", chakra: 3 },
-
-    // Fourth chakra (5)
-    { q: "Emotions and relationships are the central theme in my daily thoughts.", chakra: 4 },
-    { q: "In my mind, love—the experience of love and the realization of love—is the meaning and purpose of life; it is the supreme value and the highest destination.", chakra: 4 },
-    { q: "Without the fulfillment of a deep romantic love, I will feel that my life lacks logic and meaning. The union between another and me gives meaning to everything.", chakra: 4 },
-    { q: "The peak moments of my life were times when I shared profound intimacy and emotional vulnerability with other people, animals or God.", chakra: 4 },
-    { q: "In my mind, love is the power that can save the world and change it for the better. Deep healing through love is the only real thing that this world needs.", chakra: 4 },
-
-    // Fifth chakra (5)
-    { q: "From my direct experience and from other people’s feedback I have learned that, when I talk to people, I magnetize, enrapture and influence them very strongly. It seems that I possess a high capacity to convince and influence those around me.", chakra: 5 },
-    { q: "I can easily explain and interpret complex ideas in a very accessible and effective way. It seems that I can help others understand things that don’t belong to their ordinary field of knowledge.", chakra: 5 },
-    { q: "I excel in manifesting and materializing ideas and initiatives. There is a long list of ideas and initiatives that I have managed to realize and fulfill. I also have many plans in my mind that are waiting to be fulfilled in the future.", chakra: 5 },
-    { q: "For me, the most important thing in the world is to succeed in voicing the truths I believe in. I am hoping to influence others in this way. I have a tremendous urge to express myself clearly and powerfully. It is like an engine that ceaselessly works and roars inside of me.", chakra: 5 },
-    { q: "It is clear to me that I am capable of leading people toward the fulfillment of ideas that I believe in. It seems like the most natural thing for me is to guide and teach others.", chakra: 5 },
-
-    // Sixth chakra (5)
-    { q: "Understanding how things work and why they work this way is my deepest urge in life. The central themes in my thoughts are universal questions, which are all motivated by my urge to decipher the laws behind the universe.", chakra: 6 },
-    { q: "The most admirable role models in my mind are philosophers, inventors, researchers and other people who have managed to penetrate the mysteries of the universe through their wisdom and their inquiring minds. I follow in their footsteps by trying to develop insight into the nature of the universe.", chakra: 6 },
-    { q: "The things that give me the highest ecstasy are brilliant mental structures, perfect and wholesome ideas, wise models and ladders of development and sublime mental orders that accurately copy the subtle harmonies of the cosmos.", chakra: 6 },
-    { q: "Ever since I can remember, there was something in me that remained uninvolved, observing the world and humans as if from afar, and inquiring into their customs and habits. Quite often, this impersonal, detached and sometimes even arrogant observation seems stronger than life itself.", chakra: 6 },
-    { q: "Whenever a strong emotion appears inside of me, I am not interested in experiencing and feeling it, but I am interested in investigating it, as if I am a scientist observing a phenomenon in my lab. I passionately examine its more universal aspects, its dynamics and the general, impersonal insight that is concealed within it.", chakra: 6 },
-
-    // Seventh chakra (5)
-    { q: "Without any difficulty or doubt I could renounce the world and move into a cave for full-time meditation or join some spiritual order for the rest of my life. When abandoning the world I wouldn’t feel any desire to return and fulfill missed opportunities.", chakra: 7 },
-    { q: "The subtle melting down of personal barriers is, for me, the supreme type of fulfillment and, in fact, the only type of fulfillment. Everything else is completely secondary and pales in significance.", chakra: 7 },
-    { q: "Observation of silence, fasts, solitude, retreats and very long meditation practices are very natural for me, and I tend to practice them quite often.", chakra: 7 },
-    { q: "Sexuality, romantic partnerships, family, self-fulfillment, advancement in life and achievements of any kind trouble my thoughts very little, if at all.", chakra: 7 },
-    { q: "The heavenly and spiritual realms are my true home, and I feel that, in a way, I did not originate from this earth. I carry the feeling with me daily that I actually abide in realms that are very far from the visible world, and that I’m only a guest in the material dimension.", chakra: 7 },
+    {
+      q: "Wie reagierst du, wenn du mit einer neuen Herausforderung konfrontiert wirst?",
+      answers: [
+        "a) Ich suche nach Sicherheit und Stabilität.",   // 1
+        "b) Ich lasse mich auf neue Erfahrungen ein und genieße sie.", // 2
+        "c) Ich nehme die Herausforderung als Möglichkeit, mich zu beweisen.", // 3
+        "d) Ich frage andere um Rat und Unterstützung.", // 4
+        "e) Ich spreche offen über meine Gedanken dazu.", // 5
+        "f) Ich analysiere die Situation intuitiv.", // 6
+        "g) Ich vertraue, dass alles einen höheren Sinn hat.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist dir im Alltag am wichtigsten?",
+      answers: [
+        "a) Ein geregelter Tagesablauf.", // 1
+        "b) Genuss und Lebensfreude.", // 2
+        "c) Erfolge und Anerkennung.", // 3
+        "d) Harmonie in Beziehungen.", // 4
+        "e) Ehrliche Kommunikation.", // 5
+        "f) Neue Erkenntnisse und Einsichten.", // 6
+        "g) Spirituelle Entwicklung.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie gehst du mit Konflikten um?",
+      answers: [
+        "a) Ich ziehe mich zurück und suche Sicherheit.", // 1
+        "b) Ich versuche, die Situation kreativ zu lösen.", // 2
+        "c) Ich setze mich durch und stehe zu meiner Meinung.", // 3
+        "d) Ich versuche, Verständnis für alle Seiten zu zeigen.", // 4
+        "e) Ich spreche sofort offen darüber.", // 5
+        "f) Ich beobachte und analysiere die Hintergründe.", // 6
+        "g) Ich lasse los und vertraue auf das Universum.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was gibt dir am meisten Energie?",
+      answers: [
+        "a) Natur und Erdung.", // 1
+        "b) Sinnliche Erfahrungen.", // 2
+        "c) Herausforderungen und Ziele.", // 3
+        "d) Liebe und Nähe.", // 4
+        "e) Inspirierende Gespräche.", // 5
+        "f) Zeit für Reflexion und Intuition.", // 6
+        "g) Meditation und Spiritualität.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie würdest du dich selbst am ehesten beschreiben?",
+      answers: [
+        "a) Bodenständig und praktisch.", // 1
+        "b) Lebenslustig und kreativ.", // 2
+        "c) Ehrgeizig und zielorientiert.", // 3
+        "d) Empathisch und herzlich.", // 4
+        "e) Ausdrucksstark und kommunikativ.", // 5
+        "f) Intuitiv und nachdenklich.", // 6
+        "g) Spirituell und offen.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist für dich in Beziehungen besonders wichtig?",
+      answers: [
+        "a) Verlässlichkeit und Sicherheit.", // 1
+        "b) Leidenschaft und gemeinsamer Spaß.", // 2
+        "c) Gemeinsame Ziele und Entwicklung.", // 3
+        "d) Tiefe Gefühle und Verbundenheit.", // 4
+        "e) Ehrliches Mitteilen.", // 5
+        "f) Gemeinsames Wachstum und Erkenntnisse.", // 6
+        "g) Spirituelle Verbindung.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie gehst du mit Veränderungen um?",
+      answers: [
+        "a) Ich brauche Zeit, um mich daran zu gewöhnen.", // 1
+        "b) Ich begrüße sie als Chance für neue Erfahrungen.", // 2
+        "c) Ich nutze sie, um mich weiterzuentwickeln.", // 3
+        "d) Ich suche Unterstützung bei anderen.", // 4
+        "e) Ich spreche offen über meine Gefühle dazu.", // 5
+        "f) Ich reflektiere die tiefere Bedeutung.", // 6
+        "g) Ich vertraue auf den größeren Plan.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was motiviert dich im Leben?",
+      answers: [
+        "a) Sicherheit und Stabilität.", // 1
+        "b) Genuss und Kreativität.", // 2
+        "c) Erfolg und Anerkennung.", // 3
+        "d) Liebe und Verbundenheit.", // 4
+        "e) Ideen und Austausch.", // 5
+        "f) Erkenntnisse und Intuition.", // 6
+        "g) Sinn und Spiritualität.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie gehst du mit Stress um?",
+      answers: [
+        "a) Ich ziehe mich an einen ruhigen, sicheren Ort zurück.", // 1
+        "b) Ich suche Ablenkung und Spaß.", // 2
+        "c) Ich fokussiere mich auf meine Ziele.", // 3
+        "d) Ich spreche mit vertrauten Menschen darüber.", // 4
+        "e) Ich kommuniziere meine Bedürfnisse klar.", // 5
+        "f) Ich reflektiere und suche nach Lösungen.", // 6
+        "g) Ich meditiere oder bete.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was bedeutet Erfolg für dich?",
+      answers: [
+        "a) Ein sicheres und stabiles Leben.", // 1
+        "b) Genuss und Lebensfreude auskosten.", // 2
+        "c) Ziele erreichen und Anerkennung bekommen.", // 3
+        "d) Liebevolle Beziehungen führen.", // 4
+        "e) Mich ausdrücken und verstanden werden.", // 5
+        "f) Erkenntnisse gewinnen und wachsen.", // 6
+        "g) Inneren Frieden und Sinn finden.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Worauf achtest du besonders bei der Arbeit?",
+      answers: [
+        "a) Struktur und Zuverlässigkeit.", // 1
+        "b) Kreative Entfaltungsmöglichkeiten.", // 2
+        "c) Herausforderungen und Aufstiegschancen.", // 3
+        "d) Gutes Miteinander im Team.", // 4
+        "e) Klare Kommunikation.", // 5
+        "f) Raum für neue Ideen.", // 6
+        "g) Sinnhaftigkeit der Tätigkeit.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie verbringst du am liebsten deine Freizeit?",
+      answers: [
+        "a) In der Natur oder mit Familie.", // 1
+        "b) Mit kreativen Aktivitäten.", // 2
+        "c) Beim Sport oder Herausforderungen.", // 3
+        "d) Mit Freunden und lieben Menschen.", // 4
+        "e) Beim Lesen oder Diskutieren.", // 5
+        "f) Mit Meditation oder Reflexion.", // 6
+        "g) Mit spirituellen Praktiken.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was gibt dir Halt in schwierigen Zeiten?",
+      answers: [
+        "a) Familie und vertraute Menschen.", // 1
+        "b) Genuss und kleine Freuden.", // 2
+        "c) Mein Wille und meine Ziele.", // 3
+        "d) Liebe und Mitgefühl.", // 4
+        "e) Austausch mit anderen.", // 5
+        "f) Innere Einsicht und Intuition.", // 6
+        "g) Glaube und Spiritualität.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist deine größte Stärke?",
+      answers: [
+        "a) Durchhaltevermögen und Verlässlichkeit.", // 1
+        "b) Kreativität und Lebensfreude.", // 2
+        "c) Zielstrebigkeit und Disziplin.", // 3
+        "d) Empathie und Hilfsbereitschaft.", // 4
+        "e) Kommunikationsfähigkeit.", // 5
+        "f) Intuition und Weitblick.", // 6
+        "g) Spiritualität und Vertrauen.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie gehst du mit Fehlern um?",
+      answers: [
+        "a) Ich versuche, daraus zu lernen und wieder Sicherheit zu gewinnen.", // 1
+        "b) Ich nehme sie mit Humor.", // 2
+        "c) Ich analysiere, wie ich es besser machen kann.", // 3
+        "d) Ich spreche offen über meine Gefühle.", // 4
+        "e) Ich suche Feedback von anderen.", // 5
+        "f) Ich reflektiere sie auf einer tieferen Ebene.", // 6
+        "g) Ich nehme sie als Teil meines Weges an.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Worauf bist du am meisten stolz?",
+      answers: [
+        "a) Mein stabiles Umfeld.", // 1
+        "b) Meine Kreativität.", // 2
+        "c) Meine Erfolge.", // 3
+        "d) Meine Beziehungen.", // 4
+        "e) Meine Kommunikationsfähigkeit.", // 5
+        "f) Meine Intuition.", // 6
+        "g) Mein spirituelles Wachstum.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist dir bei Entscheidungen am wichtigsten?",
+      answers: [
+        "a) Sicherheit und Verlässlichkeit.", // 1
+        "b) Bauchgefühl und Freude.", // 2
+        "c) Zielorientierung.", // 3
+        "d) Harmonie mit anderen.", // 4
+        "e) Austausch und Diskussion.", // 5
+        "f) Intuition und Einsicht.", // 6
+        "g) Spirituelle Führung.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was inspiriert dich am meisten?",
+      answers: [
+        "a) Natur und Beständigkeit.", // 1
+        "b) Kreative Menschen.", // 2
+        "c) Erfolgreiche Persönlichkeiten.", // 3
+        "d) Liebevolle Beziehungen.", // 4
+        "e) Inspirierende Gespräche.", // 5
+        "f) Neue Erkenntnisse.", // 6
+        "g) Spirituelle Lehrer.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie gehst du mit Unsicherheiten um?",
+      answers: [
+        "a) Ich suche Stabilität.", // 1
+        "b) Ich lenke mich mit schönen Dingen ab.", // 2
+        "c) Ich übernehme die Kontrolle.", // 3
+        "d) Ich rede mit vertrauten Menschen.", // 4
+        "e) Ich spreche offen über meine Sorgen.", // 5
+        "f) Ich reflektiere und suche nach dem Sinn.", // 6
+        "g) Ich vertraue auf das Leben.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist für dich das größte Lebensziel?",
+      answers: [
+        "a) Ein sicheres Zuhause.", // 1
+        "b) Genuss und Lebensfreude.", // 2
+        "c) Erfolg und Selbstverwirklichung.", // 3
+        "d) Liebe und Verbundenheit.", // 4
+        "e) Sich ausdrücken und verstanden werden.", // 5
+        "f) Erkenntnis und Weisheit.", // 6
+        "g) Spirituelle Erfüllung.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie reagierst du, wenn dich jemand kritisiert?",
+      answers: [
+        "a) Ich ziehe mich zurück.", // 1
+        "b) Ich versuche, es mit Humor zu nehmen.", // 2
+        "c) Ich verteidige meine Position.", // 3
+        "d) Ich versuche, die Gefühle des anderen zu verstehen.", // 4
+        "e) Ich spreche offen über meine Sicht.", // 5
+        "f) Ich reflektiere die Kritik tiefgründig.", // 6
+        "g) Ich nehme sie als Lernchance für meinen Weg.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist für dich das Schönste am Leben?",
+      answers: [
+        "a) Sicherheit und Geborgenheit.", // 1
+        "b) Genuss und Sinnlichkeit.", // 2
+        "c) Erfolge feiern.", // 3
+        "d) Liebe erleben.", // 4
+        "e) Sich ausdrücken können.", // 5
+        "f) Erkenntnisse gewinnen.", // 6
+        "g) Spirituelle Erfahrungen.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie gehst du mit Unsicherheiten in Beziehungen um?",
+      answers: [
+        "a) Ich suche Stabilität und Nähe.", // 1
+        "b) Ich bringe Leichtigkeit hinein.", // 2
+        "c) Ich kläre die Situation direkt.", // 3
+        "d) Ich spreche offen über meine Gefühle.", // 4
+        "e) Ich kommuniziere meine Bedürfnisse.", // 5
+        "f) Ich reflektiere die Dynamik.", // 6
+        "g) Ich vertraue auf die Entwicklung.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist dir bei Freundschaften am wichtigsten?",
+      answers: [
+        "a) Verlässlichkeit.", // 1
+        "b) Gemeinsamer Spaß.", // 2
+        "c) Gegenseitige Motivation.", // 3
+        "d) Tiefe Verbundenheit.", // 4
+        "e) Offener Austausch.", // 5
+        "f) Gemeinsame Entwicklung.", // 6
+        "g) Spiritueller Austausch.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Wie reagierst du auf neue Ideen?",
+      answers: [
+        "a) Ich prüfe, ob sie zu meinem Leben passen.", // 1
+        "b) Ich lasse mich inspirieren.", // 2
+        "c) Ich frage mich, wie ich sie umsetzen kann.", // 3
+        "d) Ich bespreche sie mit anderen.", // 4
+        "e) Ich teile meine Meinung dazu.", // 5
+        "f) Ich reflektiere sie tiefgründig.", // 6
+        "g) Ich lasse sie auf mich wirken.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
+    {
+      q: "Was ist deine größte Herausforderung?",
+      answers: [
+        "a) Veränderungen akzeptieren.", // 1
+        "b) Gefühle zulassen.", // 2
+        "c) Kontrolle abgeben.", // 3
+        "d) Grenzen setzen.", // 4
+        "e) Sich klar auszudrücken.", // 5
+        "f) Den eigenen Intuitionen vertrauen.", // 6
+        "g) Im Hier und Jetzt bleiben.", // 7
+      ],
+      chakra: [1,2,3,4,5,6,7]
+    },
   ];
+
+  // Helper: answer mapping for 7 options (a-g)
+  // a=1, b=2, c=3, d=4, e=5, f=6, g=7
 
   const chakraColors = {
     1: '#e11d48',
@@ -604,7 +904,11 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
     chartInstance = null;
 
   function startQuiz() {
-    shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+    // Shuffle questions only on the client
+    shuffledQuestions = [...questions].sort(() => {
+      // Math.random() is browser-specific; ensure this runs only on client
+      return Math.random() - 0.5;
+    });
     currentIndex = 0;
     chakraScores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
     quizDiv.style.display = 'block';
@@ -618,10 +922,17 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
     questionDiv.innerText = q.q;
     progressText.innerText = `Frage ${currentIndex + 1} von ${shuffledQuestions.length}`;
     progressBarDiv.style.width = `${((currentIndex + 1) / shuffledQuestions.length) * 100}%`;
+    renderAnswerButtons();
   }
 
+  // value: index of selected answer (0-6)
   function answer(value) {
-    chakraScores[shuffledQuestions[currentIndex].chakra] += value;
+    // Each answer in the question maps to a chakra type: 0->1, 1->2, ..., 6->7
+    const q = shuffledQuestions[currentIndex];
+    if (q && Array.isArray(q.chakra) && q.chakra.length > value) {
+      const chakraNum = q.chakra[value];
+      chakraScores[chakraNum] = (chakraScores[chakraNum] || 0) + 1;
+    }
     currentIndex++;
     if (currentIndex < shuffledQuestions.length) showQuestion();
     else showResults();
@@ -631,8 +942,40 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
     quizDiv.style.display = 'none';
     resultDiv.style.display = 'flex';
 
-    const entries = Object.entries(chakraScores).sort((a, b) => b[1] - a[1]);
-    const [top, second] = entries;
+    // Letter-based counts (A-G) for chart and mapping
+    // Map chakraScores (1-7) to letters a-g
+    const letterCounts = {};
+    for (let i = 1; i <= 7; ++i) {
+      const letter = String.fromCharCode(96 + i); // 97='a'
+      letterCounts[letter] = chakraScores[i] || 0;
+    }
+
+    // Chakra letter to full name mapping for chart and result
+    const chakraMap = {
+      a: "Wurzelchakra (Builder)",
+      b: "Sakralchakra (Artist)",
+      c: "Solarplexus (Achiever)",
+      d: "Herzchakra (Caretaker)",
+      e: "Halschakra (Speaker)",
+      f: "Stirnchakra (Thinker)",
+      g: "Kronenchakra (Yogi)"
+    };
+
+    // Helper to get top 3 letter chakras
+    function getTopThreeChakras(answerCounts) {
+      const countsArray = Object.keys(answerCounts).map(letter => ({
+        letter,
+        count: answerCounts[letter] || 0,
+        chakra: chakraMap[letter]
+      }));
+      countsArray.sort((a, b) => b.count - a.count);
+      return countsArray.slice(0, 3);
+    }
+
+    // Get top three chakras (letters)
+    const topThree = getTopThreeChakras(letterCounts);
+    const top = topThree[0];
+    const second = topThree[1];
 
     // Chakra minimalistic card styles and color gradients (soft pastel)
     const chakraGradients = {
@@ -676,65 +1019,75 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
       `;
     }
 
+    // Show top chakra cards (main + second) using mapping (convert letter to chakraId)
     chakraSummaryDiv.innerHTML = `
       <div style="display: flex; gap: 28px; justify-content: center; align-items: stretch; margin: 30px 0 18px 0;">
-        ${chakraCard({ chakraId: top[0], label: 'Zentral' })}
-        ${chakraCard({ chakraId: second[0], label: 'Sekundär' })}
+        ${chakraCard({ chakraId: top.letter.charCodeAt(0) - 96, label: 'Zentral' })}
+        ${chakraCard({ chakraId: second.letter.charCodeAt(0) - 96, label: 'Sekundär' })}
       </div>
     `;
-
-    // Add subtle separation from rest of results
     chakraSummaryDiv.style.marginBottom = "10px";
     chakraSummaryDiv.style.marginTop = "0";
     chakraSummaryDiv.style.width = "100%";
 
-    const ctx = canvas.getContext('2d');
+    // Chart: labels and data based on letterCounts and chakraMap
+    const chartCanvas = canvas;
     if (chartInstance) chartInstance.destroy();
-
-    chartInstance = new Chart(ctx, {
+    const chartLabels = ["a","b","c","d","e","f","g"].map(l => chakraMap[l]);
+    const chartData = ["a","b","c","d","e","f","g"].map(l => letterCounts[l] || 0);
+    const chartColors = [
+      "#e11d48", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#8b5cf6", "#9333ea"
+    ];
+    chartInstance = new Chart(chartCanvas, {
       type: 'bar',
       data: {
-        labels: entries.map((e) => chakraDescriptions[e[0]].split(' – ')[0]),
-        datasets: [
-          {
-            data: entries.map((e) => e[1]),
-            backgroundColor: entries.map((e) => chakraColors[e[0]]),
-            borderRadius: 8,
-          },
-        ],
+        labels: chartLabels,
+        datasets: [{
+          label: 'Anzahl Antworten pro Chakra-Typ',
+          data: chartData,
+          backgroundColor: chartColors
+        }]
       },
       options: {
         responsive: true,
         plugins: {
           legend: { display: false },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1, color: '#374151' },
-            grid: {
-              color: '#e5e7eb',
-              borderColor: '#d1d5db',
-            },
-          },
-          x: {
-            ticks: { color: '#374151' },
-            grid: {
-              display: false,
-            },
-          },
-        },
-      },
+          title: { display: true, text: 'Chakra-Typ Verteilung' }
+        }
+      }
     });
 
-    // Helper to render chakra analysis as collapsible cards per life area
+    // "Dein Ergebnis" section: show main type and top 3
+    const mainChakraName = chakraMap[top.letter];
+    // Top three list
+    let topThreeHtml = `
+      <div style="margin-top:18px;text-align:left;">
+        <div style="font-weight:600;margin-bottom:4px;">Top 3 Chakra-Typen:</div>
+        <ol style="margin:0;padding-left:18px;">
+          ${topThree.map(t =>
+            `<li>
+              <strong>${t.letter.toUpperCase()}</strong>: ${chakraMap[t.letter]} &ndash; <span style="color:#6366f1;font-weight:500;">${t.count}</span>
+            </li>`
+          ).join('')}
+        </ol>
+      </div>
+    `;
+    // Insert main result and top three list above chart
+    chakraSummaryDiv.innerHTML += `
+      <div style="width:100%;max-width:600px;margin:0 auto 0 auto;text-align:left;">
+        <div style="margin-top:10px;font-size:1.1rem;">
+          <span style="font-weight:600;color:#6366f1;">Dein Haupt-Chakra-Typ:</span>
+          <span style="font-weight:700;">${mainChakraName}</span>
+        </div>
+        ${topThreeHtml}
+      </div>
+    `;
+
+    // Helper to render chakra analysis as collapsible cards per life area (unchanged)
     function renderChakraAnalysisCollapsible(chakraId, chakraColor) {
       const analysis = chakraAnalysisText[chakraId];
       if (!analysis) return '';
-      // Split by line breaks (each life area)
       const lines = analysis.split('\n').filter(Boolean);
-      // Each line: Area: Description
-      // We'll assign a unique id per chakra/area for aria-controls etc.
       return `
         <div class="chakra-collapsible-group">
           ${lines
@@ -834,37 +1187,33 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
       document.head.appendChild(collapsibleStyle);
     }
 
+    // Show chakra analysis for top two (main and secondary)
     chakraAnalysisDiv.innerHTML = `
       <h3 style="color:#4f46e5; margin-bottom: 12px;">
-        Analyse deines zentralen Chakras (${chakraDescriptions[top[0]].split(' – ')[0]}):
+        Analyse deines zentralen Chakras (${chakraDescriptions[top.letter.charCodeAt(0) - 96].split(' – ')[0]}):
       </h3>
-      ${renderChakraAnalysisCollapsible(top[0], chakraColors[top[0]])}
+      ${renderChakraAnalysisCollapsible(top.letter.charCodeAt(0) - 96, chartColors[top.letter.charCodeAt(0) - 97])}
       <h3 style="color:#4f46e5; margin-top: 24px; margin-bottom: 12px;">
-        Analyse deines sekundären Chakras (${chakraDescriptions[second[0]].split(' – ')[0]}):
+        Analyse deines sekundären Chakras (${chakraDescriptions[second.letter.charCodeAt(0) - 96].split(' – ')[0]}):
       </h3>
-      ${renderChakraAnalysisCollapsible(second[0], chakraColors[second[0]])}
+      ${renderChakraAnalysisCollapsible(second.letter.charCodeAt(0) - 96, chartColors[second.letter.charCodeAt(0) - 97])}
     `;
 
     // Add collapsible toggle JS for all headers in chakraAnalysisDiv
     Array.from(chakraAnalysisDiv.querySelectorAll('.chakra-collapsible-header')).forEach(header => {
       header.addEventListener('click', function () {
         const expanded = header.getAttribute('aria-expanded') === 'true';
-        // Find the next sibling .chakra-collapsible-content
         const content = header.parentElement.querySelector('.chakra-collapsible-content');
         if (!content) return;
         if (expanded) {
-          // Collapse
           content.style.maxHeight = '0';
           header.setAttribute('aria-expanded', 'false');
         } else {
-          // Expand
           content.style.maxHeight = content.scrollHeight + 'px';
           header.setAttribute('aria-expanded', 'true');
         }
       });
     });
-
-    // On window resize, adjust expanded panels' max-height to fit content
     window.addEventListener('resize', function () {
       Array.from(chakraAnalysisDiv.querySelectorAll('.chakra-collapsible-header[aria-expanded="true"]')).forEach(header => {
         const content = header.parentElement.querySelector('.chakra-collapsible-content');
@@ -1061,10 +1410,7 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
     doc.save("chakra_quiz_ergebnis.pdf");
   }
 
-  btn3.addEventListener('click', () => answer(3));
-  btn2.addEventListener('click', () => answer(2));
-  btn1.addEventListener('click', () => answer(1));
-  btn0.addEventListener('click', () => answer(0));
+  // No static button listeners needed; handled dynamically in renderAnswerButtons()
   restartBtn.addEventListener('click', startQuiz);
   downloadPdfBtn.addEventListener('click', downloadPDF);
 
