@@ -22,6 +22,12 @@ export function initChakraQuiz(containerId) {
   // Clear container content
   container.innerHTML = '';
 
+  // Global rainbow headline
+  const globalHeadline = document.createElement('h1');
+  globalHeadline.textContent = 'Chakra Personality Test';
+  globalHeadline.className = 'global-headline';
+  container.appendChild(globalHeadline);
+
   // Create quiz elements
   const quizDiv = document.createElement('div');
   quizDiv.id = 'quiz';
@@ -31,6 +37,216 @@ export function initChakraQuiz(containerId) {
   quizHeadline.className = 'chakra-quiz-headline';
   const quizDesc = document.createElement('p');
   quizDesc.className = 'chakra-quiz-desc';
+
+  // --- Intro (language selection + slides) ---
+  const introDiv = document.createElement('div');
+  introDiv.id = 'intro';
+  introDiv.style.display = 'flex';
+  introDiv.style.flexDirection = 'column';
+  introDiv.style.alignItems = 'center';
+  introDiv.style.gap = '16px';
+
+  // Language choice
+  const langTitle = document.createElement('h2');
+  langTitle.style.margin = '0';
+  langTitle.style.fontSize = '1.3rem';
+  langTitle.style.color = '#4f46e5';
+  langTitle.textContent = 'Sprache / Language';
+
+  const langWrap = document.createElement('div');
+  langWrap.style.display = 'flex';
+  langWrap.style.gap = '10px';
+
+  const btnDE = document.createElement('button');
+  btnDE.className = 'restart-btn';
+  btnDE.textContent = 'Deutsch';
+
+  const btnEN = document.createElement('button');
+  btnEN.className = 'restart-btn';
+  btnEN.textContent = 'English';
+
+  langWrap.appendChild(btnDE);
+  langWrap.appendChild(btnEN);
+
+  // Slides container
+  const slideBox = document.createElement('div');
+  slideBox.id = 'introSlides';
+  slideBox.style.width = '100%';
+  slideBox.style.maxWidth = '720px';
+  slideBox.style.padding = '14px 16px';
+  slideBox.style.border = '1px solid #e5e7eb';
+  slideBox.style.borderRadius = '14px';
+  slideBox.style.background = '#f8fafc';
+  slideBox.style.display = 'none';
+
+  const slideContent = document.createElement('div');
+  slideContent.style.textAlign = 'left';
+  slideContent.style.color = '#374151';
+  slideContent.style.lineHeight = '1.55';
+  slideContent.style.fontSize = '1rem';
+
+  const slideNav = document.createElement('div');
+  slideNav.style.display = 'flex';
+  slideNav.style.justifyContent = 'space-between';
+  slideNav.style.alignItems = 'center';
+  slideNav.style.marginTop = '12px';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.className = 'restart-btn';
+  prevBtn.textContent = '‹';
+
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'restart-btn';
+  nextBtn.textContent = '›';
+
+  const dots = document.createElement('div');
+  dots.style.display = 'flex';
+  dots.style.gap = '6px';
+  dots.style.alignItems = 'center';
+
+  const startBtn = document.createElement('button');
+  startBtn.className = 'restart-btn';
+  startBtn.textContent = 'Start';
+  startBtn.style.marginTop = '6px';
+  // Hide start until last slide
+  startBtn.style.display = 'none';
+
+  slideNav.appendChild(prevBtn);
+  slideNav.appendChild(dots);
+  slideNav.appendChild(nextBtn);
+
+  slideBox.appendChild(slideContent);
+  slideBox.appendChild(slideNav);
+  slideBox.appendChild(startBtn);
+
+  introDiv.appendChild(langTitle);
+  introDiv.appendChild(langWrap);
+  introDiv.appendChild(slideBox);
+
+  // Hide language choice once a language is selected
+  function hideLangChoice() {
+    langTitle.style.display = 'none';
+    langWrap.style.display = 'none';
+  }
+
+  // State for slides
+  let currentSlide = 0;
+  let slides = [];
+
+  function buildSlidesFor(lang) {
+    if (lang === 'de') {
+      return [
+        {
+          title: 'Worum geht es?',
+          body:
+            'Dieser Test zeigt dir, welche deiner sieben Chakra-Qualitäten im Alltag dominieren. Das hilft dir, Stärken bewusster zu nutzen und Dysbalancen zu erkennen. Er unterstützt dich dabei, Klarheit über deine innere Ausrichtung zu gewinnen und praktische Hinweise für dein persönliches Wachstum zu erhalten.'
+        },
+        {
+          title: 'Die sieben Typen',
+          body:
+            '<span style="color:#e11d48">●</span> <strong>Builder 🧱:</strong> Stabilität, Sicherheit, Verlässlichkeit. Schafft Struktur und gibt Erdung.<br><br>' +
+            '<span style="color:#f97316">●</span> <strong>Artist 🎨:</strong> Kreativität, Freude, Sinnlichkeit. Bringt Lebendigkeit und spielerischen Ausdruck in den Alltag.<br><br>' +
+            '<span style="color:#eab308">●</span> <strong>Achiever 🏆:</strong> Wille, Zielklarheit, Durchsetzung. Treibt Projekte fokussiert und energievoll voran.<br><br>' +
+            '<span style="color:#22c55e">●</span> <strong>Caretaker 💚:</strong> Liebe, Mitgefühl, Heilung. Schafft Verbundenheit und harmonische Beziehungen.<br><br>' +
+            '<span style="color:#3b82f6">●</span> <strong>Speaker 🎤:</strong> Kommunikation, Authentizität, Inspiration. Teilt Gedanken klar und bewegt andere.<br><br>' +
+            '<span style="color:#8b5cf6">●</span> <strong>Thinker 🧠:</strong> Intuition, Weisheit, Klarheit. Erkennt Muster und entwickelt Visionen.<br><br>' +
+            '<span style="color:#9333ea">●</span> <strong>Yogi 🕊️:</strong> Spiritualität, Vertrauen, Einheit. Verbindet sich mit dem größeren Ganzen.'
+        },
+        {
+          title: 'So funktioniert es',
+          body:
+            'Beantworte 25 Fragen intuitiv. Am Ende bekommst du eine Auswertung mit deinem Haupt- und Sekundärtyp plus praktische Hinweise.'
+        }
+      ];
+    }
+    return [
+      {
+        title: 'What is this?',
+        body:
+          'This test reveals which of your seven chakra qualities dominate your daily life. It helps you use your strengths more consciously, notice imbalances, and provides clarity about your inner alignment along with practical hints for growth.'
+      },
+      {
+        title: 'The seven types',
+        body:
+          '<span style="color:#e11d48">●</span> <strong>Builder 🧱:</strong> Stability, safety, reliability. Creates structure and groundedness.<br><br>' +
+          '<span style="color:#f97316">●</span> <strong>Artist 🎨:</strong> Creativity, joy, sensuality. Brings vitality and playful expression into daily life.<br><br>' +
+          '<span style="color:#eab308">●</span> <strong>Achiever 🏆:</strong> Willpower, determination, ambition. Drives projects forward with energy and focus.<br><br>' +
+          '<span style="color:#22c55e">●</span> <strong>Caretaker 💚:</strong> Love, compassion, healing. Builds harmony and emotional connection in relationships.<br><br>' +
+          '<span style="color:#3b82f6">●</span> <strong>Speaker 🎤:</strong> Communication, authenticity, inspiration. Expresses ideas clearly and influences others.<br><br>' +
+          '<span style="color:#8b5cf6">●</span> <strong>Thinker 🧠:</strong> Intuition, wisdom, clarity. Recognizes patterns and develops visionary insights.<br><br>' +
+          '<span style="color:#9333ea">●</span> <strong>Yogi 🕊️:</strong> Spirituality, trust, unity. Connects deeply with the greater whole.'
+      },
+      {
+        title: 'How it works',
+        body:
+          'Answer 25 questions by intuition. You will get a result with your primary and secondary type plus practical guidance.'
+      }
+    ];
+  }
+
+  function renderDots() {
+    dots.innerHTML = '';
+    for (let i = 0; i < slides.length; i++) {
+      const d = document.createElement('span');
+      d.style.width = '8px';
+      d.style.height = '8px';
+      d.style.borderRadius = '999px';
+      d.style.border = '1px solid #c7d2fe';
+      d.style.background = i === currentSlide ? '#6366f1' : '#eef2ff';
+      dots.appendChild(d);
+    }
+  }
+
+  function showSlide(idx) {
+    const s = slides[idx];
+    if (!s) return;
+    slideContent.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font-size:1.05rem;font-weight:700;color:#4f46e5;">${s.title}</div>
+        <div style="font-size:1rem;color:#374151;">${s.body}</div>
+      </div>
+    `;
+
+    // navigation state: force users to click through all slides
+    const isFirst = idx === 0;
+    const isLast = idx === slides.length - 1;
+    prevBtn.disabled = isFirst;
+    prevBtn.style.opacity = isFirst ? '0.5' : '1';
+    prevBtn.style.pointerEvents = isFirst ? 'none' : 'auto';
+
+    nextBtn.style.display = isLast ? 'none' : 'inline-flex';
+    startBtn.style.display = isLast ? 'inline-flex' : 'none';
+
+    renderDots();
+  }
+
+  function onLangPick(lang) {
+    currentLanguage = lang;
+    updateQuizHeadlineAndDesc();
+    slides = buildSlidesFor(lang);
+    currentSlide = 0;
+    slideBox.style.display = 'block';
+    hideLangChoice();
+    showSlide(currentSlide);
+  }
+
+  btnDE.addEventListener('click', () => onLangPick('de'));
+  btnEN.addEventListener('click', () => onLangPick('en'));
+
+  prevBtn.addEventListener('click', () => {
+    currentSlide = Math.max(0, currentSlide - 1);
+    showSlide(currentSlide);
+  });
+  nextBtn.addEventListener('click', () => {
+    currentSlide = Math.min(slides.length - 1, currentSlide + 1);
+    showSlide(currentSlide);
+  });
+  startBtn.addEventListener('click', () => {
+    quizDiv.style.display = 'block';
+    resultDiv.style.display = 'none';
+    introDiv.style.display = 'none';
+    startQuiz();
+  });
 
   // Progress bar and quiz
   const progressDiv = document.createElement('div');
@@ -74,39 +290,6 @@ export function initChakraQuiz(containerId) {
 
   let currentLanguage = 'en';
 
-  // --- Language selector for quiz page ---
-  const langSelectTop = document.createElement('select');
-  langSelectTop.id = 'langSelectTop';
-  langSelectTop.className = 'restart-btn';
-  langSelectTop.style.position = 'fixed';
-  langSelectTop.style.top = 'max(10px, env(safe-area-inset-top))';
-  langSelectTop.style.right = 'max(10px, env(safe-area-inset-right))';
-  langSelectTop.style.margin = '0';
-  langSelectTop.style.maxWidth = '80px';
-  langSelectTop.style.minWidth = '60px';
-  langSelectTop.style.fontSize = '0.8rem';
-  langSelectTop.style.padding = '2px 4px';
-  langSelectTop.style.zIndex = '1000';
-  langSelectTop.innerHTML = `
-    <option value="en">EN</option>
-    <option value="de">DE</option>
-  `;
-  
-  langSelectTop.value = currentLanguage;
-  langSelectTop.addEventListener('change', () => {
-    currentLanguage = langSelectTop.value;
-    questions = translations[currentLanguage];
-    updateQuizHeadlineAndDesc();
-    if (quizDiv.style.display !== 'none') {
-      startQuiz();
-    } else {
-      updateQuizHeadlineAndDesc();
-    }
-    showQuestion();
-    const rs = document.getElementById('langSelectResult');
-    if (rs) rs.value = currentLanguage;
-  });
-  document.body.appendChild(langSelectTop);
 
   // Add headline and description above quiz container, outside quizDiv, and center them
   // Remove headline/desc from inside quizDiv
@@ -118,10 +301,14 @@ export function initChakraQuiz(containerId) {
   quizHeadlineContainer.style.width = '100%';
   quizHeadlineContainer.appendChild(quizHeadline);
   quizHeadlineContainer.appendChild(quizDesc);
+  // Headline/Desc ausblenden
+  quizHeadlineContainer.style.display = 'none';
   container.appendChild(quizHeadlineContainer);
+  container.appendChild(introDiv);
 
   // Add quizDiv content
   quizDiv.style.position = 'relative';
+  quizDiv.style.display = 'none';
   // Do NOT append headline/desc to quizDiv anymore
   quizDiv.appendChild(progressDiv);
   quizDiv.appendChild(progressText);
@@ -131,6 +318,7 @@ export function initChakraQuiz(containerId) {
   const resultDiv = document.createElement('div');
   resultDiv.id = 'result';
   resultDiv.className = 'result';
+  resultDiv.style.display = 'none';
 
   const resultTitle = document.createElement('h2');
   resultTitle.textContent = 'Dein Ergebnis';
@@ -190,6 +378,23 @@ export function initChakraQuiz(containerId) {
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+    .global-headline {
+      font-size: 2.2rem;
+      font-weight: 800;
+      text-align: center;
+      margin: 0 0 20px 0;
+      background: linear-gradient(90deg, #4f46e5, #6366f1, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+    @media (max-width: 700px) {
+      .global-headline {
+        font-size: 1.6rem;
+        margin-bottom: 12px;
+      }
     }
     #${containerId} {
       width: 100%;
@@ -273,7 +478,7 @@ export function initChakraQuiz(containerId) {
       letter-spacing: 0.01em;
     }
     .question {
-      ont-size: 1.22rem;
+      font-size: 1.22rem;
       font-weight: 700;
       margin-bottom: 16px;
       color: #111827; /* starker Text */
@@ -544,14 +749,6 @@ export function initChakraQuiz(containerId) {
            .download-pdf-btn {
        margin-top: 12px;
      }
-    /* Compact language selectors (top + result) */
-      #langSelectTop {
-  width: auto;
-  min-width: 60px;
-  max-width: 80px;
-  font-size: 0.8rem;
-  padding: 2px 4px;
-}
 
 
 }
@@ -1183,9 +1380,8 @@ export function initChakraQuiz(containerId) {
   };
 
   function updateQuizHeadlineAndDesc() {
-    // Always keep the German headline/desc for both languages as per requirements
-    quizHeadline.textContent = quizHeadlineDescTranslations['de'].headline;
-    quizDesc.textContent = quizHeadlineDescTranslations['de'].desc;
+    quizHeadline.textContent = quizHeadlineDescTranslations[currentLanguage].headline;
+    quizDesc.textContent = quizHeadlineDescTranslations[currentLanguage].desc;
   }
 
   // Helper: answer mapping for 7 options (a-g)
@@ -1773,39 +1969,10 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
     doc.save("chakra_quiz_ergebnis.pdf");
   }
 
-  // Add language selector for result page
-  const langSelectResult = document.createElement('select');
-  langSelectResult.id = 'langSelectResult';
-  langSelectResult.className = 'restart-btn';
-  langSelectResult.style.marginLeft = '8px';
-  langSelectResult.style.maxWidth = '140px';
-  langSelectResult.innerHTML = `
-    <option value="en">EN</option>
-    <option value="de">DE</option>
-  `;
-  langSelectResult.value = currentLanguage;
-  langSelectResult.addEventListener('change', () => {
-    currentLanguage = langSelectResult.value;
-    questions = translations[currentLanguage];
-    updateQuizHeadlineAndDesc();
-    startQuiz();
-    const ts = document.getElementById('langSelectTop');
-    if (ts) ts.value = currentLanguage;
-  });
-  resultDiv.insertBefore(langSelectResult, restartBtn);
 
   restartBtn.addEventListener('click', startQuiz);
   downloadPdfBtn.addEventListener('click', downloadPDF);
 
-  // Set both language selectors to correct value on load
-  function updateLanguageToggleButtons() {
-    const ts = document.getElementById('langSelectTop');
-    const rs = document.getElementById('langSelectResult');
-    if (ts) ts.value = currentLanguage;
-    if (rs) rs.value = currentLanguage;
-  }
-  // Set headline/desc and language toggles on load
+  // Set headline/desc on load and show intro (quiz starts after Start button)
   updateQuizHeadlineAndDesc();
-  updateLanguageToggleButtons();
-  startQuiz();
 }
