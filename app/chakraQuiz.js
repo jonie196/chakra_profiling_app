@@ -28,10 +28,8 @@ export function initChakraQuiz(containerId) {
 
   // --- Headline and description ---
   const quizHeadline = document.createElement('h1');
-  quizHeadline.textContent = 'Chakra Persönlichkeitstest';
   quizHeadline.className = 'chakra-quiz-headline';
   const quizDesc = document.createElement('p');
-  quizDesc.textContent = 'Finde heraus, welche Chakras in deinem Leben besonders stark oder schwach ausgeprägt sind und erhalte eine persönliche Analyse.';
   quizDesc.className = 'chakra-quiz-desc';
 
   // Progress bar and quiz
@@ -57,20 +55,68 @@ export function initChakraQuiz(containerId) {
     answersDiv.innerHTML = '';
     const q = shuffledQuestions[currentIndex];
     if (!q || !q.answers) return;
-    q.answers.forEach((answerText, idx) => {
-      const btn = document.createElement('button');
-      btn.id = `btn${idx}`;
-      btn.textContent = answerText;
-      // The answerText is e.g. "a) ...", so extract the letter for mapping
-      // But since all questions have answers a-g in order, idx maps directly to chakra 1-7
-      btn.addEventListener('click', () => answer(idx));
-      answersDiv.appendChild(btn);
+    const letters = ['a','b','c','d','e','f','g'];
+    // Always show all 7 options in correct order, using translation for current language
+    letters.forEach((l, idx) => {
+      const answerText = q.answers[l];
+      if (typeof answerText === 'string' && answerText.length > 0) {
+        const btn = document.createElement('button');
+        btn.id = `btn${idx}`;
+        btn.textContent = answerText;
+        btn.addEventListener('click', () => answer(idx));
+        answersDiv.appendChild(btn);
+      }
     });
   }
 
-  // Add headline and desc above progress bar
-  quizDiv.appendChild(quizHeadline);
-  quizDiv.appendChild(quizDesc);
+  let currentLanguage = 'en';
+
+  // --- Language selector for quiz page ---
+  const langSelectTop = document.createElement('select');
+  langSelectTop.id = 'langSelectTop';
+  langSelectTop.className = 'restart-btn';
+  langSelectTop.style.position = 'absolute';
+  langSelectTop.style.top = '10px';
+  langSelectTop.style.right = '10px';
+  langSelectTop.style.margin = '0';
+  langSelectTop.style.maxWidth = '140px';
+  langSelectTop.style.zIndex = '1000';
+  langSelectTop.innerHTML = `
+    <option value="en">EN</option>
+    <option value="de">DE</option>
+  `;
+
+  langSelectTop.value = currentLanguage;
+  langSelectTop.addEventListener('change', () => {
+    currentLanguage = langSelectTop.value;
+    questions = translations[currentLanguage];
+    updateQuizHeadlineAndDesc();
+    if (quizDiv.style.display !== 'none') {
+      startQuiz();
+    } else {
+      updateQuizHeadlineAndDesc();
+    }
+    showQuestion();
+    const rs = document.getElementById('langSelectResult');
+    if (rs) rs.value = currentLanguage;
+  });
+  document.body.appendChild(langSelectTop);
+
+  // Add headline and description above quiz container, outside quizDiv, and center them
+  // Remove headline/desc from inside quizDiv
+  const quizHeadlineContainer = document.createElement('div');
+  quizHeadlineContainer.style.display = 'flex';
+  quizHeadlineContainer.style.flexDirection = 'column';
+  quizHeadlineContainer.style.alignItems = 'center';
+  quizHeadlineContainer.style.justifyContent = 'center';
+  quizHeadlineContainer.style.width = '100%';
+  quizHeadlineContainer.appendChild(quizHeadline);
+  quizHeadlineContainer.appendChild(quizDesc);
+  container.appendChild(quizHeadlineContainer);
+
+  // Add quizDiv content
+  quizDiv.style.position = 'relative';
+  // Do NOT append headline/desc to quizDiv anymore
   quizDiv.appendChild(progressDiv);
   quizDiv.appendChild(progressText);
   quizDiv.appendChild(questionDiv);
@@ -482,347 +528,634 @@ export function initChakraQuiz(containerId) {
   `;
   document.head.appendChild(style);
 
-  // Chakra Quiz Fragen (25, 7 Antwortoptionen a-g, Mapping: a=1, b=2, c=3, d=4, e=5, f=6, g=7)
-  const questions = [
-    {
-      q: "Wie reagierst du, wenn du mit einer neuen Herausforderung konfrontiert wirst?",
-      answers: [
-        "a) Ich suche nach Sicherheit und Stabilität.",   // 1
-        "b) Ich lasse mich auf neue Erfahrungen ein und genieße sie.", // 2
-        "c) Ich nehme die Herausforderung als Möglichkeit, mich zu beweisen.", // 3
-        "d) Ich frage andere um Rat und Unterstützung.", // 4
-        "e) Ich spreche offen über meine Gedanken dazu.", // 5
-        "f) Ich analysiere die Situation intuitiv.", // 6
-        "g) Ich vertraue, dass alles einen höheren Sinn hat.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
+  // Language selection and translations for questions
+
+  const translations = {
+    en: [
+      {
+        question: "1. Select the statement you identify with the most.",
+        answers: {
+          a: "Life is an opportunity to build something solid—to diligently and patiently establish stability, groundedness, and peace of mind.",
+          b: "The world is full of endless adventures and opportunities, and we are here to experience as many of them as possible.",
+          c: "Life is an opportunity to bring out the best in ourselves, become a success story, and emerge victorious.",
+          d: "The world is a space of emotional bonding, and we are here to realize our maximum potential as love in a human form.",
+          e: "Life presents the opportunity to discover our message, express our truest voice, and influence others’ lives.",
+          f: "The world is a space of endless learning and knowledge, and our role in it is to stretch our intelligence and understanding as much as possible.",
+          g: "Life is an opportunity for a profound inner journey of spiritual liberation and transcendence."
+        }
+      },
+      {
+        question: "2. What would you say is the most active part of you?",
+        answers: {
+          a: "The earthly, grounded, and instinctual part of my being.",
+          b: "My feelings, impulses, and the intelligence of my body.",
+          c: "My willpower and ambition.",
+          d: "My deep emotional world.",
+          e: "My voice, expression, and communication.",
+          f: "My mind and intellect.",
+          g: "The spiritual part of my being."
+        }
+      },
+      {
+        question: "3. Which imagery immediately makes you feel like you are in the right place?",
+        answers: {
+          a: "A beautiful house, a garden, and prosperous land.",
+          b: "Someone dancing in a trancelike, ecstatic state at a party.",
+          c: "Climbing a mountaintop, nearly reaching the peak.",
+          d: "Two people’s hands entwining and caressing each other.",
+          e: "A speaker in a big lecture hall facing a large crowd.",
+          f: "A library and a lone writer sitting in it, immersed in their own world.",
+          g: "A monk in deep meditation."
+        }
+      },
+      {
+        question: "4. My ideal way of sharing my being with others is…",
+        answers: {
+          a: "Serving the needs of my family and community with my skills and abilities.",
+          b: "Having fun, laughing, dancing, and experiencing physical and sensual joy.",
+          c: "Striving toward some shared target with effort and determination.",
+          d: "A one-on-one, personal, and intimate sharing in which we open our hearts to one another.",
+          e: "Guiding others or discussing and creating a grand vision with them.",
+          f: "Engaging in a profound philosophical discussion with a thoughtful person.",
+          g: "Meditating, praying, and simply being with others who are spiritually oriented."
+        }
+      },
+      {
+        question: "5. The best way I could spend my time is by…",
+        answers: {
+          a: "Carrying out small actions and plans that put life into order and balance.",
+          b: "Immersing myself in the outdoors, moving my body, and breathing the moment deep into my being.",
+          c: "Making sure that everything I do can lead me to my goal.",
+          d: "Helping someone and making sure they are happy.",
+          e: "Writing or recording a message that could change people’s lives.",
+          f: "Delving into a book by a great philosopher.",
+          g: "Watching a video of a spiritual or religious teacher."
+        }
+      },
+      {
+        question: "6. Since childhood, my main connection with the world has been through…",
+        answers: {
+          a: "My search for belonging and my role in the systems of the world.",
+          b: "Playfulness and experimentation.",
+          c: "Winning in various competitions and other settings.",
+          d: "Strong feelings toward certain others.",
+          e: "Educating and leading others.",
+          f: "Distant observation and quiet inner study.",
+          g: "Indifference and unbelonging."
+        }
+      },
+      {
+        question: "7. Others would say that I am…",
+        answers: {
+          a: "Diligent, serious, responsible, cautious, and accurate.",
+          b: "Restless, intense, passionate, humorous, and always hunting for a new experience.",
+          c: "Ambitious, driven, focused, busy, and competitive.",
+          d: "Emotional, sensitive, caring, helpful, and kindhearted.",
+          e: "Inquisitive, controlling, intense, idealistic, and expressive.",
+          f: "Wise, silent, distant, deep, and aware.",
+          g: "Spiritual, introverted, unearthly, gentle, and dreamy."
+        }
+      },
+      {
+        question: "8. At heart, I am a…",
+        answers: {
+          a: "Hard worker.",
+          b: "Dancer.",
+          c: "Warrior.",
+          d: "Lover.",
+          e: "Communicator.",
+          f: "Philosopher.",
+          g: "Meditator."
+        }
+      },
+      {
+        question: "9. I am…",
+        answers: {
+          a: "Slow and careful.",
+          b: "Quick and spontaneous.",
+          c: "Persistent and determined.",
+          d: "Mild and harmonious.",
+          e: "Intense and engaging.",
+          f: "Distant and observant.",
+          g: "Dreamy and spacey."
+        }
+      },
+      {
+        question: "10. Choose the word that you respond the most to.",
+        answers: {
+          a: "Foundation.",
+          b: "Passion.",
+          c: "Victory.",
+          d: "Love.",
+          e: "Vision.",
+          f: "Wisdom.",
+          g: "Silence."
+        }
+      },
+      {
+        question: "11. Which building sounds the most interesting and impressive to you?",
+        answers: {
+          a: "An ancient history museum.",
+          b: "A whimsical, artistic building.",
+          c: "A skyscraper.",
+          d: "A sanctuary for the underserved.",
+          e: "A congressional hall.",
+          f: "A university.",
+          g: "An ashram or a monastery."
+        }
+      },
+      {
+        question: "12. When I leave this world, I want to know that…",
+        answers: {
+          a: "I have benefited and contributed to my family, community, and people.",
+          b: "I have experienced life totally and let it in fully.",
+          c: "I have achieved the highest goals I set for myself.",
+          d: "I have loved strongly enough.",
+          e: "I have left behind a legacy of influence and impact.",
+          f: "I have understood some of life’s hidden mysteries.",
+          g: "I have experienced my innermost spirit."
+        }
+      },
+      {
+        question: "13. Which of these negative attributes characterizes you the most?",
+        answers: {
+          a: "Overcaution.",
+          b: "Lack of commitment.",
+          c: "Anger.",
+          d: "Neediness.",
+          e: "A controlling nature.",
+          f: "Arrogance.",
+          g: "Detachment."
+        }
+      },
+      {
+        question: "14. How do you feel when you read the following statement? “I love dealing with details—calculations and figures, materials and accurate planning, pieces of information, and schedules.”",
+        answers: {
+          a: "Yes! I totally agree.",
+          b: "No, dealing with details makes me want to fly away. I love doing nothing!",
+          c: "Yes, but only if it leads me to some clear and powerful goal.",
+          d: "Yes, but only if it clearly helps me serve someone I love.",
+          e: "No, I would rather leap to the vision at the edge of my imagination.",
+          f: "No, small details have no intelligence or depth in them.",
+          g: "No, earthly life has no spiritual meaning."
+        }
+      },
+      {
+        question: "15. When an overwhelming negative emotion arises in me, I…",
+        answers: {
+          a: "Do anything I can to calm it down and put myself back together.",
+          b: "Become one with it, totally experience it, and quickly return to joy.",
+          c: "Take it out on my surroundings.",
+          d: "Become overwhelmed and struggle to transform it into harmony.",
+          e: "Try to control and suffocate it.",
+          f: "Investigate it as a scientist.",
+          g: "Meditate."
+        }
+      },
+      {
+        question: "16. How much do you like change and mobility in life (as opposed to routine and permanence)?",
+        answers: {
+          a: "Big changes feel unhealthy and destabilizing for me. I prefer slow and gradual change.",
+          b: "Change is my middle name. I always feel on fire and can’t stand routine!",
+          c: "I don’t like disruptions, but I know how to adjust them to my plans.",
+          d: "I am fine with changes as long as I get to keep all my loved ones with me.",
+          e: "I get confused when things change and collide with the dream inside me.",
+          f: "I prefer to create a routine that allows me to deeply explore the mental realm.",
+          g: "I don’t initiate changes, but I can accept changes when they come as God’s will."
+        }
+      },
+      {
+        question: "17. How would you describe your type and level of energy?",
+        answers: {
+          a: "Slow and persistent, like a low flame.",
+          b: "Rapid, quick, and physical, like a flare.",
+          c: "Massive and uncompromising, like a bulldozer.",
+          d: "Gentle and soft, like a breeze.",
+          e: "Intense and wakeful.",
+          f: "Mainly concentrated in my head, not so physical.",
+          g: "Airy, like levitation."
+        }
+      },
+      {
+        question: "18. I feel most alive when…",
+        answers: {
+          a: "I manage to grasp the inner mechanism of something.",
+          b: "I am experiencing creative expression.",
+          c: "I manage to remove obstacles and take a step forward.",
+          d: "I am in a state of intimacy and bonding.",
+          e: "I manage to influence and affect the lives of others.",
+          f: "I have new and brilliant insights.",
+          g: "I manage to enter deep states of consciousness."
+        }
+      },
+      {
+        question: "19. How do you feel when you read the following statement? “I want to change the world!”",
+        answers: {
+          a: "My aspirations are not that great. However, I want to know that I have benefited others and my community.",
+          b: "Far from it. I just want to be myself and express that creatively and authentically.",
+          c: "I want to conquer the world!",
+          d: "I just spread love with all my heart. Whatever happens, happens.",
+          e: "Yes—by spreading my ideas, visions, and creations, I dream of having a global impact.",
+          f: "My thoughts and ideas are far too deep to change the common people.",
+          g: "Global change is none of my concern. I am only occupied with the eternal."
+        }
+      },
+      {
+        question: "20. Think of the color that best represents your deepest, innermost being (as opposed to your “favorite” color). Which of the following colors most closely resembles the color of your inner being?",
+        answers: {
+          a: "Deep red.",
+          b: "Fizzy orange.",
+          c: "Radiant yellow.",
+          d: "Soft and light green.",
+          e: "Deep and intense blue.",
+          f: "Lush and mysterious purple.",
+          g: "Bright white; colorless."
+        }
+      },
+      {
+        question: "21. Choose your most cherished values.",
+        answers: {
+          a: "Respect, loyalty, patience.",
+          b: "Joy, totality, beauty.",
+          c: "Courage, perseverance, dignity.",
+          d: "Compassion, friendship, harmony.",
+          e: "Authenticity, autonomy, self-expression.",
+          f: "Intelligence, clarity, depth.",
+          g: "Purity, nonattachment, freedom."
+        }
+      },
+      {
+        question: "22. How do you feel when you read the following statement? “I love being part of a larger unit like a tradition, family, community, or nation. It feels healthy and supportive.”",
+        answers: {
+          a: "Perfectly accurate.",
+          b: "Not at all! I avoid frameworks that limit my freedom of choice and experience.",
+          c: "I appreciate structures, but it is most important for me to stand out and be myself.",
+          d: "Structures are wonderful as long as they are opportunities for love.",
+          e: "I am more interested in my dreams about better, even utopian, communities.",
+          f: "Such structures are for common people. I prefer to research this phenomenon.",
+          g: "Only if these larger units are spiritual and support spirituality."
+        }
+      },
+      {
+        question: "23. How much do you like long-term projects and lifetime commitments?",
+        answers: {
+          a: "A lot—as long as they are relaxed and secure processes.",
+          b: "The very idea terrifies me. I feel like I’m in a cage.",
+          c: "I like them as long as they lead to some successful end and are constantly growing and expanding.",
+          d: "I like them, but they need to be essentially emotional commitments.",
+          e: "I like them, but only if they include a vision that thrills me and never stifles my dreams.",
+          f: "I like them if they are intellectual by nature and lead to new depths.",
+          g: "My only lifelong commitment is to my spiritual journey."
+        }
+      },
+      {
+        question: "24. Choose the figure that you relate to the most.",
+        answers: {
+          a: "Thomas Edison, inventor.",
+          b: "Jim Morrison, rock legend and poet.",
+          c: "Ernesto “Che” Guevara, warrior and revolutionary.",
+          d: "Mother Teresa, missionary of charity.",
+          e: "Martin Luther King Jr., speaker and leader.",
+          f: "Sigmund Freud, psychologist and theorist.",
+          g: "Francis of Assisi, saint."
+        }
+      },
+      {
+        question: "25. Which historical revolution impresses you the most?",
+        answers: {
+          a: "The agricultural or industrial revolution.",
+          b: "The social revolution of the ’60s (the flower children).",
+          c: "The victory in the Second World War.",
+          d: "Nonviolent peace movements like Gandhi’s and King’s.",
+          e: "The emergence of democracy in ancient Athens.",
+          f: "Ancient Greek philosophy.",
+          g: "The emergence of teachers like the Buddha or Jesus."
+        }
+      }
+    ],
+    de: [
+      {
+        question: "1. Wähle die Aussage, mit der du dich am meisten identifizierst.",
+        answers: {
+          a: "Das Leben ist eine Gelegenheit, etwas Solides zu erschaffen – geduldig und fleißig Stabilität, Erdung und innere Ruhe zu etablieren.",
+          b: "Die Welt ist voller Abenteuer und Möglichkeiten. Wir sind hier, um so viele davon wie möglich zu erleben.",
+          c: "Das Leben ist eine Chance, das Beste aus uns herauszuholen, Erfolgsgeschichten zu schreiben und als Sieger hervorzugehen.",
+          d: "Die Welt ist ein Raum für emotionale Bindung, und wir sind hier, um unser höchstes Potenzial als Liebe in menschlicher Form zu entfalten.",
+          e: "Das Leben bietet die Möglichkeit, unsere Botschaft zu entdecken, unsere wahre Stimme auszudrücken und das Leben anderer zu beeinflussen.",
+          f: "Die Welt ist ein Ort endlosen Lernens und Wissens, und unsere Aufgabe ist es, unsere Intelligenz und unser Verständnis maximal zu erweitern.",
+          g: "Das Leben ist eine Gelegenheit für eine tiefe innere Reise spiritueller Befreiung und Transzendenz."
+        }
+      },
+      {
+        question: "2. Welcher Teil von dir ist am aktivsten?",
+        answers: {
+          a: "Der irdische, geerdete und instinktive Teil meines Wesens.",
+          b: "Meine Gefühle, Impulse und die Intelligenz meines Körpers.",
+          c: "Mein Wille und mein Ehrgeiz.",
+          d: "Meine tiefe Gefühlswelt.",
+          e: "Meine Stimme, mein Ausdruck und meine Kommunikation.",
+          f: "Mein Geist und Intellekt.",
+          g: "Der spirituelle Teil meines Wesens."
+        }
+      },
+      {
+        question: "3. Bei welchem Bild hast du sofort das Gefühl, am richtigen Ort zu sein?",
+        answers: {
+          a: "Ein schönes Haus, ein Garten und fruchtbares Land.",
+          b: "Jemand tanzt in ekstatischer Trance auf einer Party.",
+          c: "Einen Berg erklimmen und fast den Gipfel erreichen.",
+          d: "Zwei Hände, die sich liebevoll ineinander verschlingen.",
+          e: "Ein Redner in einem großen Hörsaal vor vielen Menschen.",
+          f: "Eine Bibliothek mit einem einsamen Schreibenden, vertieft in seine Welt.",
+          g: "Ein Mönch in tiefer Meditation."
+        }
+      },
+      {
+        question: "4. Meine ideale Art, mein Sein mit anderen zu teilen, ist…",
+        answers: {
+          a: "Mit meinen Fähigkeiten meiner Familie und Gemeinschaft zu dienen.",
+          b: "Spaß haben, lachen, tanzen und körperliche sowie sinnliche Freude erleben.",
+          c: "Gemeinsam mit anderen mit Einsatz und Entschlossenheit auf ein Ziel hinarbeiten.",
+          d: "Ein persönliches, intimes Miteinander, bei dem wir unsere Herzen öffnen.",
+          e: "Andere anleiten oder gemeinsam eine große Vision entwickeln.",
+          f: "Ein tiefgründiges philosophisches Gespräch mit einer nachdenklichen Person.",
+          g: "Meditieren, beten und einfach mit anderen spirituell orientierten Menschen sein."
+        }
+      },
+      {
+        question: "5. Die schönste Art, meine Zeit zu verbringen, ist…",
+        answers: {
+          a: "Kleine Handlungen und Pläne umsetzen, die das Leben in Ordnung und Balance bringen.",
+          b: "Draußen sein, mich bewegen und den Moment tief in mich aufnehmen.",
+          c: "Sicherstellen, dass alles, was ich tue, mich meinem Ziel näherbringt.",
+          d: "Jemandem helfen und für sein Glück sorgen.",
+          e: "Eine Botschaft schreiben oder aufnehmen, die das Leben anderer verändern kann.",
+          f: "Mich in ein Buch eines großen Philosophen vertiefen.",
+          g: "Ein Video eines spirituellen oder religiösen Lehrers anschauen."
+        }
+      },
+      {
+        question: "6. Seit meiner Kindheit ist meine Hauptverbindung zur Welt…",
+        answers: {
+          a: "Meine Suche nach Zugehörigkeit und meine Rolle in den Systemen der Welt.",
+          b: "Verspieltheit und Experimentierfreude.",
+          c: "Siegen in Wettbewerben und anderen Situationen.",
+          d: "Starke Gefühle für bestimmte Menschen.",
+          e: "Andere zu unterrichten und anzuleiten.",
+          f: "Distanzierte Beobachtung und stilles inneres Forschen.",
+          g: "Gleichgültigkeit und Nichtzugehörigkeit."
+        }
+      },
+      {
+        question: "7. Andere würden sagen, ich bin…",
+        answers: {
+          a: "Fleißig, ernst, verantwortungsbewusst, vorsichtig und genau.",
+          b: "Unruhig, leidenschaftlich, humorvoll und immer auf der Suche nach neuen Erlebnissen.",
+          c: "Ehrgeizig, zielstrebig, fokussiert, beschäftigt und wettbewerbsorientiert.",
+          d: "Emotional, sensibel, fürsorglich, hilfsbereit und herzlich.",
+          e: "Neugierig, kontrollierend, idealistisch und ausdrucksstark.",
+          f: "Weise, still, distanziert, tiefgründig und aufmerksam.",
+          g: "Spirituell, introvertiert, weltentrückt, sanft und verträumt."
+        }
+      },
+      {
+        question: "8. Im Herzen bin ich ein…",
+        answers: {
+          a: "Arbeiter.",
+          b: "Tänzer.",
+          c: "Kämpfer.",
+          d: "Liebender.",
+          e: "Kommunikator.",
+          f: "Philosoph.",
+          g: "Meditierender."
+        }
+      },
+      {
+        question: "9. Ich bin…",
+        answers: {
+          a: "Langsam und vorsichtig.",
+          b: "Schnell und spontan.",
+          c: "Ausdauernd und entschlossen.",
+          d: "Sanft und harmonisch.",
+          e: "Intensiv und mitreißend.",
+          f: "Distanziert und beobachtend.",
+          g: "Verträumt und abgehoben."
+        }
+      },
+      {
+        question: "10. Welches Wort spricht dich am meisten an?",
+        answers: {
+          a: "Grundlage.",
+          b: "Leidenschaft.",
+          c: "Sieg.",
+          d: "Liebe.",
+          e: "Vision.",
+          f: "Weisheit.",
+          g: "Stille."
+        }
+      },
+      {
+        question: "11. Welches Gebäude klingt für dich am interessantesten und beeindruckendsten?",
+        answers: {
+          a: "Ein Museum für Geschichte.",
+          b: "Ein verspieltes, künstlerisches Gebäude.",
+          c: "Ein Wolkenkratzer.",
+          d: "Ein Zufluchtsort für Bedürftige.",
+          e: "Ein Parlamentssaal.",
+          f: "Eine Universität.",
+          g: "Ein Ashram oder Kloster."
+        }
+      },
+      {
+        question: "12. Wenn ich diese Welt verlasse, möchte ich wissen, dass…",
+        answers: {
+          a: "Ich meiner Familie, Gemeinschaft und den Menschen geholfen und etwas beigetragen habe.",
+          b: "Ich das Leben vollkommen erfahren und es voll zugelassen habe.",
+          c: "Ich die höchsten Ziele erreicht habe, die ich mir gesetzt habe.",
+          d: "Ich stark genug geliebt habe.",
+          e: "Ich ein Vermächtnis von Einfluss und Wirkung hinterlassen habe.",
+          f: "Ich einige der verborgenen Geheimnisse des Lebens verstanden habe.",
+          g: "Ich meinen innersten Geist erfahren habe."
+        }
+      },
+      {
+        question: "13. Welche dieser negativen Eigenschaften trifft am ehesten auf dich zu?",
+        answers: {
+          a: "Übervorsicht.",
+          b: "Mangel an Engagement.",
+          c: "Wut.",
+          d: "Bedürftigkeit.",
+          e: "Kontrollbedürfnis.",
+          f: "Arroganz.",
+          g: "Distanzierung."
+        }
+      },
+      {
+        question: "14. Wie fühlst du dich, wenn du folgende Aussage liest? „Ich liebe es, mich mit Details zu beschäftigen – Berechnungen und Zahlen, Materialien und genaue Planung, Informationen und Zeitpläne.“",
+        answers: {
+          a: "Ja! Stimme ich voll zu.",
+          b: "Nein, Details machen mich verrückt. Ich liebe es, nichts zu tun!",
+          c: "Ja, aber nur, wenn es zu einem klaren und kraftvollen Ziel führt.",
+          d: "Ja, aber nur, wenn es jemandem hilft, den ich liebe.",
+          e: "Nein, ich springe lieber direkt zur Vision am Rand meiner Vorstellungskraft.",
+          f: "Nein, kleine Details haben für mich keine Tiefe oder Intelligenz.",
+          g: "Nein, das irdische Leben hat für mich keine spirituelle Bedeutung."
+        }
+      },
+      {
+        question: "15. Wenn eine überwältigende negative Emotion in mir aufkommt, dann…",
+        answers: {
+          a: "Tue ich alles, um mich zu beruhigen und wieder zusammenzusetzen.",
+          b: "Ich werde eins mit ihr, erlebe sie total und kehre dann schnell zur Freude zurück.",
+          c: "Lasse ich es an meiner Umgebung aus.",
+          d: "Werde ich überwältigt und habe Mühe, sie in Harmonie zu verwandeln.",
+          e: "Versuche ich, sie zu kontrollieren und zu unterdrücken.",
+          f: "Untersuche ich sie wie ein Wissenschaftler.",
+          g: "Meditiere ich."
+        }
+      },
+      {
+        question: "16. Wie sehr magst du Veränderungen und Mobilität im Leben (im Gegensatz zu Routine und Beständigkeit)?",
+        answers: {
+          a: "Große Veränderungen verunsichern mich. Ich bevorzuge langsame und allmähliche Veränderung.",
+          b: "Veränderung ist mein zweiter Vorname. Ich kann keine Routine ertragen!",
+          c: "Ich mag keine Störungen, aber ich weiß, wie ich sie in meine Pläne einbaue.",
+          d: "Veränderungen sind ok, solange ich alle meine Liebsten bei mir behalten kann.",
+          e: "Ich werde verwirrt, wenn sich Dinge ändern und mit meinem inneren Traum kollidieren.",
+          f: "Ich schaffe mir lieber Routinen, um geistige Tiefe zu erforschen.",
+          g: "Ich initiiere keine Veränderungen, aber ich akzeptiere sie als göttlichen Willen."
+        }
+      },
+      {
+        question: "17. Wie würdest du deinen Energie-Typ und dein Energie-Level beschreiben?",
+        answers: {
+          a: "Langsam und ausdauernd, wie eine kleine Flamme.",
+          b: "Schnell, sprunghaft und körperlich, wie eine Fackel.",
+          c: "Massiv und kompromisslos, wie ein Bulldozer.",
+          d: "Sanft und weich, wie eine Brise.",
+          e: "Intensiv und wach.",
+          f: "Hauptsächlich im Kopf konzentriert, wenig körperlich.",
+          g: "Luftig, wie Schweben."
+        }
+      },
+      {
+        question: "18. Ich fühle mich am lebendigsten, wenn…",
+        answers: {
+          a: "Ich den inneren Mechanismus von etwas verstehe.",
+          b: "Ich mich kreativ ausdrücke.",
+          c: "Ich Hindernisse beseitige und einen Schritt vorankomme.",
+          d: "Ich in Intimität und Verbundenheit bin.",
+          e: "Ich das Leben anderer beeinflussen kann.",
+          f: "Ich neue, brillante Einsichten habe.",
+          g: "Ich in tiefe Bewusstseinszustände eintauche."
+        }
+      },
+      {
+        question: "19. Wie fühlst du dich, wenn du folgende Aussage liest? „Ich will die Welt verändern!“",
+        answers: {
+          a: "So große Ambitionen habe ich nicht. Ich möchte aber wissen, dass ich anderen und meiner Gemeinschaft geholfen habe.",
+          b: "Ganz und gar nicht. Ich will einfach ich selbst sein und das kreativ und authentisch ausdrücken.",
+          c: "Ich will die Welt erobern!",
+          d: "Ich verbreite einfach Liebe mit ganzem Herzen. Was passiert, passiert.",
+          e: "Ja – indem ich Ideen, Visionen und Kreationen verbreite, träume ich von globalem Einfluss.",
+          f: "Meine Gedanken sind zu tief, um die breite Masse zu erreichen.",
+          g: "Globale Veränderung ist nicht mein Thema. Ich beschäftige mich nur mit dem Ewigen."
+        }
+      },
+      {
+        question: "20. Welche Farbe entspricht am ehesten deinem innersten Wesen (nicht deiner „Lieblingsfarbe“)?",
+        answers: {
+          a: "Tiefes Rot.",
+          b: "Spritziges Orange.",
+          c: "Strahlendes Gelb.",
+          d: "Sanftes, helles Grün.",
+          e: "Tiefes, intensives Blau.",
+          f: "Üppiges, mystisches Violett.",
+          g: "Helles Weiß; farblos."
+        }
+      },
+      {
+        question: "21. Wähle deine wichtigsten Werte.",
+        answers: {
+          a: "Respekt, Loyalität, Geduld.",
+          b: "Freude, Ganzheit, Schönheit.",
+          c: "Mut, Ausdauer, Würde.",
+          d: "Mitgefühl, Freundschaft, Harmonie.",
+          e: "Authentizität, Autonomie, Selbstausdruck.",
+          f: "Intelligenz, Klarheit, Tiefe.",
+          g: "Reinheit, Loslösung, Freiheit."
+        }
+      },
+      {
+        question: "22. Wie fühlst du dich, wenn du folgende Aussage liest? „Ich liebe es, Teil einer größeren Einheit wie Tradition, Familie, Gemeinschaft oder Nation zu sein. Es fühlt sich gesund und unterstützend an.“",
+        answers: {
+          a: "Absolut zutreffend.",
+          b: "Überhaupt nicht! Ich meide Rahmen, die meine Freiheit einschränken.",
+          c: "Ich schätze Strukturen, aber am wichtigsten ist es, herauszustechen und ich selbst zu sein.",
+          d: "Strukturen sind wunderbar, solange sie Gelegenheiten für Liebe sind.",
+          e: "Ich interessiere mich mehr für meine Träume von besseren, sogar utopischen Gemeinschaften.",
+          f: "Solche Strukturen sind für die Masse. Ich forsche lieber darüber.",
+          g: "Nur wenn diese Einheiten spirituell sind und Spiritualität fördern."
+        }
+      },
+      {
+        question: "23. Wie stehst du zu langfristigen Projekten und lebenslangen Verpflichtungen?",
+        answers: {
+          a: "Sehr – solange es entspannte und sichere Prozesse sind.",
+          b: "Der Gedanke macht mir Angst. Ich fühle mich wie im Käfig.",
+          c: "Ich mag sie, solange sie zu Erfolg führen und stetig wachsen.",
+          d: "Ich mag sie, aber sie müssen emotionale Bindungen sein.",
+          e: "Ich mag sie nur, wenn sie eine Vision enthalten, die mich begeistert und meine Träume nicht erstickt.",
+          f: "Ich mag sie, wenn sie geistig sind und zu neuer Tiefe führen.",
+          g: "Meine einzige lebenslange Verpflichtung gilt dem spirituellen Weg."
+        }
+      },
+      {
+        question: "24. Mit welcher Persönlichkeit identifizierst du dich am meisten?",
+        answers: {
+          a: "Thomas Edison, Erfinder.",
+          b: "Jim Morrison, Rocklegende und Dichter.",
+          c: "Ernesto „Che“ Guevara, Kämpfer und Revolutionär.",
+          d: "Mutter Teresa, Missionarin der Nächstenliebe.",
+          e: "Martin Luther King Jr., Redner und Anführer.",
+          f: "Sigmund Freud, Psychologe und Theoretiker.",
+          g: "Franz von Assisi, Heiliger."
+        }
+      },
+      {
+        question: "25. Welche historische Revolution beeindruckt dich am meisten?",
+        answers: {
+          a: "Die landwirtschaftliche oder industrielle Revolution.",
+          b: "Die soziale Revolution der 60er (Flower Power).",
+          c: "Der Sieg im Zweiten Weltkrieg.",
+          d: "Gewaltfreie Friedensbewegungen wie die von Gandhi und King.",
+          e: "Die Entstehung der Demokratie im antiken Athen.",
+          f: "Die antike griechische Philosophie.",
+          g: "Das Auftreten von Lehrern wie Buddha oder Jesus."
+        }
+      }
+    ]
+  };
+
+  let questions = translations[currentLanguage];
+
+  // Headline and description translations
+  const quizHeadlineDescTranslations = {
+    en: {
+      headline: "Chakra Personality Test",
+      desc: "Find out which chakras are particularly strong or weak in your life and receive a personal analysis."
     },
-    {
-      q: "Was ist dir im Alltag am wichtigsten?",
-      answers: [
-        "a) Ein geregelter Tagesablauf.", // 1
-        "b) Genuss und Lebensfreude.", // 2
-        "c) Erfolge und Anerkennung.", // 3
-        "d) Harmonie in Beziehungen.", // 4
-        "e) Ehrliche Kommunikation.", // 5
-        "f) Neue Erkenntnisse und Einsichten.", // 6
-        "g) Spirituelle Entwicklung.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie gehst du mit Konflikten um?",
-      answers: [
-        "a) Ich ziehe mich zurück und suche Sicherheit.", // 1
-        "b) Ich versuche, die Situation kreativ zu lösen.", // 2
-        "c) Ich setze mich durch und stehe zu meiner Meinung.", // 3
-        "d) Ich versuche, Verständnis für alle Seiten zu zeigen.", // 4
-        "e) Ich spreche sofort offen darüber.", // 5
-        "f) Ich beobachte und analysiere die Hintergründe.", // 6
-        "g) Ich lasse los und vertraue auf das Universum.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was gibt dir am meisten Energie?",
-      answers: [
-        "a) Natur und Erdung.", // 1
-        "b) Sinnliche Erfahrungen.", // 2
-        "c) Herausforderungen und Ziele.", // 3
-        "d) Liebe und Nähe.", // 4
-        "e) Inspirierende Gespräche.", // 5
-        "f) Zeit für Reflexion und Intuition.", // 6
-        "g) Meditation und Spiritualität.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie würdest du dich selbst am ehesten beschreiben?",
-      answers: [
-        "a) Bodenständig und praktisch.", // 1
-        "b) Lebenslustig und kreativ.", // 2
-        "c) Ehrgeizig und zielorientiert.", // 3
-        "d) Empathisch und herzlich.", // 4
-        "e) Ausdrucksstark und kommunikativ.", // 5
-        "f) Intuitiv und nachdenklich.", // 6
-        "g) Spirituell und offen.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was ist für dich in Beziehungen besonders wichtig?",
-      answers: [
-        "a) Verlässlichkeit und Sicherheit.", // 1
-        "b) Leidenschaft und gemeinsamer Spaß.", // 2
-        "c) Gemeinsame Ziele und Entwicklung.", // 3
-        "d) Tiefe Gefühle und Verbundenheit.", // 4
-        "e) Ehrliches Mitteilen.", // 5
-        "f) Gemeinsames Wachstum und Erkenntnisse.", // 6
-        "g) Spirituelle Verbindung.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie gehst du mit Veränderungen um?",
-      answers: [
-        "a) Ich brauche Zeit, um mich daran zu gewöhnen.", // 1
-        "b) Ich begrüße sie als Chance für neue Erfahrungen.", // 2
-        "c) Ich nutze sie, um mich weiterzuentwickeln.", // 3
-        "d) Ich suche Unterstützung bei anderen.", // 4
-        "e) Ich spreche offen über meine Gefühle dazu.", // 5
-        "f) Ich reflektiere die tiefere Bedeutung.", // 6
-        "g) Ich vertraue auf den größeren Plan.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was motiviert dich im Leben?",
-      answers: [
-        "a) Sicherheit und Stabilität.", // 1
-        "b) Genuss und Kreativität.", // 2
-        "c) Erfolg und Anerkennung.", // 3
-        "d) Liebe und Verbundenheit.", // 4
-        "e) Ideen und Austausch.", // 5
-        "f) Erkenntnisse und Intuition.", // 6
-        "g) Sinn und Spiritualität.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie gehst du mit Stress um?",
-      answers: [
-        "a) Ich ziehe mich an einen ruhigen, sicheren Ort zurück.", // 1
-        "b) Ich suche Ablenkung und Spaß.", // 2
-        "c) Ich fokussiere mich auf meine Ziele.", // 3
-        "d) Ich spreche mit vertrauten Menschen darüber.", // 4
-        "e) Ich kommuniziere meine Bedürfnisse klar.", // 5
-        "f) Ich reflektiere und suche nach Lösungen.", // 6
-        "g) Ich meditiere oder bete.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was bedeutet Erfolg für dich?",
-      answers: [
-        "a) Ein sicheres und stabiles Leben.", // 1
-        "b) Genuss und Lebensfreude auskosten.", // 2
-        "c) Ziele erreichen und Anerkennung bekommen.", // 3
-        "d) Liebevolle Beziehungen führen.", // 4
-        "e) Mich ausdrücken und verstanden werden.", // 5
-        "f) Erkenntnisse gewinnen und wachsen.", // 6
-        "g) Inneren Frieden und Sinn finden.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Worauf achtest du besonders bei der Arbeit?",
-      answers: [
-        "a) Struktur und Zuverlässigkeit.", // 1
-        "b) Kreative Entfaltungsmöglichkeiten.", // 2
-        "c) Herausforderungen und Aufstiegschancen.", // 3
-        "d) Gutes Miteinander im Team.", // 4
-        "e) Klare Kommunikation.", // 5
-        "f) Raum für neue Ideen.", // 6
-        "g) Sinnhaftigkeit der Tätigkeit.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie verbringst du am liebsten deine Freizeit?",
-      answers: [
-        "a) In der Natur oder mit Familie.", // 1
-        "b) Mit kreativen Aktivitäten.", // 2
-        "c) Beim Sport oder Herausforderungen.", // 3
-        "d) Mit Freunden und lieben Menschen.", // 4
-        "e) Beim Lesen oder Diskutieren.", // 5
-        "f) Mit Meditation oder Reflexion.", // 6
-        "g) Mit spirituellen Praktiken.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was gibt dir Halt in schwierigen Zeiten?",
-      answers: [
-        "a) Familie und vertraute Menschen.", // 1
-        "b) Genuss und kleine Freuden.", // 2
-        "c) Mein Wille und meine Ziele.", // 3
-        "d) Liebe und Mitgefühl.", // 4
-        "e) Austausch mit anderen.", // 5
-        "f) Innere Einsicht und Intuition.", // 6
-        "g) Glaube und Spiritualität.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was ist deine größte Stärke?",
-      answers: [
-        "a) Durchhaltevermögen und Verlässlichkeit.", // 1
-        "b) Kreativität und Lebensfreude.", // 2
-        "c) Zielstrebigkeit und Disziplin.", // 3
-        "d) Empathie und Hilfsbereitschaft.", // 4
-        "e) Kommunikationsfähigkeit.", // 5
-        "f) Intuition und Weitblick.", // 6
-        "g) Spiritualität und Vertrauen.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie gehst du mit Fehlern um?",
-      answers: [
-        "a) Ich versuche, daraus zu lernen und wieder Sicherheit zu gewinnen.", // 1
-        "b) Ich nehme sie mit Humor.", // 2
-        "c) Ich analysiere, wie ich es besser machen kann.", // 3
-        "d) Ich spreche offen über meine Gefühle.", // 4
-        "e) Ich suche Feedback von anderen.", // 5
-        "f) Ich reflektiere sie auf einer tieferen Ebene.", // 6
-        "g) Ich nehme sie als Teil meines Weges an.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Worauf bist du am meisten stolz?",
-      answers: [
-        "a) Mein stabiles Umfeld.", // 1
-        "b) Meine Kreativität.", // 2
-        "c) Meine Erfolge.", // 3
-        "d) Meine Beziehungen.", // 4
-        "e) Meine Kommunikationsfähigkeit.", // 5
-        "f) Meine Intuition.", // 6
-        "g) Mein spirituelles Wachstum.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was ist dir bei Entscheidungen am wichtigsten?",
-      answers: [
-        "a) Sicherheit und Verlässlichkeit.", // 1
-        "b) Bauchgefühl und Freude.", // 2
-        "c) Zielorientierung.", // 3
-        "d) Harmonie mit anderen.", // 4
-        "e) Austausch und Diskussion.", // 5
-        "f) Intuition und Einsicht.", // 6
-        "g) Spirituelle Führung.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was inspiriert dich am meisten?",
-      answers: [
-        "a) Natur und Beständigkeit.", // 1
-        "b) Kreative Menschen.", // 2
-        "c) Erfolgreiche Persönlichkeiten.", // 3
-        "d) Liebevolle Beziehungen.", // 4
-        "e) Inspirierende Gespräche.", // 5
-        "f) Neue Erkenntnisse.", // 6
-        "g) Spirituelle Lehrer.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie gehst du mit Unsicherheiten um?",
-      answers: [
-        "a) Ich suche Stabilität.", // 1
-        "b) Ich lenke mich mit schönen Dingen ab.", // 2
-        "c) Ich übernehme die Kontrolle.", // 3
-        "d) Ich rede mit vertrauten Menschen.", // 4
-        "e) Ich spreche offen über meine Sorgen.", // 5
-        "f) Ich reflektiere und suche nach dem Sinn.", // 6
-        "g) Ich vertraue auf das Leben.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was ist für dich das größte Lebensziel?",
-      answers: [
-        "a) Ein sicheres Zuhause.", // 1
-        "b) Genuss und Lebensfreude.", // 2
-        "c) Erfolg und Selbstverwirklichung.", // 3
-        "d) Liebe und Verbundenheit.", // 4
-        "e) Sich ausdrücken und verstanden werden.", // 5
-        "f) Erkenntnis und Weisheit.", // 6
-        "g) Spirituelle Erfüllung.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie reagierst du, wenn dich jemand kritisiert?",
-      answers: [
-        "a) Ich ziehe mich zurück.", // 1
-        "b) Ich versuche, es mit Humor zu nehmen.", // 2
-        "c) Ich verteidige meine Position.", // 3
-        "d) Ich versuche, die Gefühle des anderen zu verstehen.", // 4
-        "e) Ich spreche offen über meine Sicht.", // 5
-        "f) Ich reflektiere die Kritik tiefgründig.", // 6
-        "g) Ich nehme sie als Lernchance für meinen Weg.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was ist für dich das Schönste am Leben?",
-      answers: [
-        "a) Sicherheit und Geborgenheit.", // 1
-        "b) Genuss und Sinnlichkeit.", // 2
-        "c) Erfolge feiern.", // 3
-        "d) Liebe erleben.", // 4
-        "e) Sich ausdrücken können.", // 5
-        "f) Erkenntnisse gewinnen.", // 6
-        "g) Spirituelle Erfahrungen.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie gehst du mit Unsicherheiten in Beziehungen um?",
-      answers: [
-        "a) Ich suche Stabilität und Nähe.", // 1
-        "b) Ich bringe Leichtigkeit hinein.", // 2
-        "c) Ich kläre die Situation direkt.", // 3
-        "d) Ich spreche offen über meine Gefühle.", // 4
-        "e) Ich kommuniziere meine Bedürfnisse.", // 5
-        "f) Ich reflektiere die Dynamik.", // 6
-        "g) Ich vertraue auf die Entwicklung.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was ist dir bei Freundschaften am wichtigsten?",
-      answers: [
-        "a) Verlässlichkeit.", // 1
-        "b) Gemeinsamer Spaß.", // 2
-        "c) Gegenseitige Motivation.", // 3
-        "d) Tiefe Verbundenheit.", // 4
-        "e) Offener Austausch.", // 5
-        "f) Gemeinsame Entwicklung.", // 6
-        "g) Spiritueller Austausch.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Wie reagierst du auf neue Ideen?",
-      answers: [
-        "a) Ich prüfe, ob sie zu meinem Leben passen.", // 1
-        "b) Ich lasse mich inspirieren.", // 2
-        "c) Ich frage mich, wie ich sie umsetzen kann.", // 3
-        "d) Ich bespreche sie mit anderen.", // 4
-        "e) Ich teile meine Meinung dazu.", // 5
-        "f) Ich reflektiere sie tiefgründig.", // 6
-        "g) Ich lasse sie auf mich wirken.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-    {
-      q: "Was ist deine größte Herausforderung?",
-      answers: [
-        "a) Veränderungen akzeptieren.", // 1
-        "b) Gefühle zulassen.", // 2
-        "c) Kontrolle abgeben.", // 3
-        "d) Grenzen setzen.", // 4
-        "e) Sich klar auszudrücken.", // 5
-        "f) Den eigenen Intuitionen vertrauen.", // 6
-        "g) Im Hier und Jetzt bleiben.", // 7
-      ],
-      chakra: [1,2,3,4,5,6,7]
-    },
-  ];
+    de: {
+      headline: "Chakra Persönlichkeitstest",
+      desc: "Finde heraus, welche Chakras in deinem Leben besonders stark oder schwach ausgeprägt sind und erhalte eine persönliche Analyse."
+    }
+  };
+
+  function updateQuizHeadlineAndDesc() {
+    // Always keep the German headline/desc for both languages as per requirements
+    quizHeadline.textContent = quizHeadlineDescTranslations['de'].headline;
+    quizDesc.textContent = quizHeadlineDescTranslations['de'].desc;
+  }
 
   // Helper: answer mapping for 7 options (a-g)
   // a=1, b=2, c=3, d=4, e=5, f=6, g=7
@@ -904,35 +1237,34 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
     chartInstance = null;
 
   function startQuiz() {
-    // Shuffle questions only on the client
-    shuffledQuestions = [...questions].sort(() => {
-      // Math.random() is browser-specific; ensure this runs only on client
-      return Math.random() - 0.5;
-    });
+    // Always use questions in the current language
+    questions = translations[currentLanguage];
+    shuffledQuestions = questions;
     currentIndex = 0;
     chakraScores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
     quizDiv.style.display = 'block';
     resultDiv.style.display = 'none';
     chakraAnalysisDiv.innerHTML = ''; // clear previous analysis
+    updateQuizHeadlineAndDesc();
     showQuestion();
   }
 
   function showQuestion() {
     const q = shuffledQuestions[currentIndex];
-    questionDiv.innerText = q.q;
-    progressText.innerText = `Frage ${currentIndex + 1} von ${shuffledQuestions.length}`;
+    questionDiv.innerText = q.question;
+    // Progress text language
+    progressText.innerText =
+      currentLanguage === 'de'
+        ? `Frage ${currentIndex + 1} von ${shuffledQuestions.length}`
+        : `Question ${currentIndex + 1} of ${shuffledQuestions.length}`;
     progressBarDiv.style.width = `${((currentIndex + 1) / shuffledQuestions.length) * 100}%`;
     renderAnswerButtons();
   }
 
-  // value: index of selected answer (0-6)
   function answer(value) {
-    // Each answer in the question maps to a chakra type: 0->1, 1->2, ..., 6->7
-    const q = shuffledQuestions[currentIndex];
-    if (q && Array.isArray(q.chakra) && q.chakra.length > value) {
-      const chakraNum = q.chakra[value];
-      chakraScores[chakraNum] = (chakraScores[chakraNum] || 0) + 1;
-    }
+    // Map answer index 0..6 -> chakra 1..7
+    const chakraNum = value + 1;
+    chakraScores[chakraNum] = (chakraScores[chakraNum] || 0) + 1;
     currentIndex++;
     if (currentIndex < shuffledQuestions.length) showQuestion();
     else showResults();
@@ -1410,9 +1742,39 @@ Kompetenzen: Spiritualität, Weisheit, Vertrauen, Inspiration, Sinn für das Gro
     doc.save("chakra_quiz_ergebnis.pdf");
   }
 
-  // No static button listeners needed; handled dynamically in renderAnswerButtons()
+  // Add language selector for result page
+  const langSelectResult = document.createElement('select');
+  langSelectResult.id = 'langSelectResult';
+  langSelectResult.className = 'restart-btn';
+  langSelectResult.style.marginLeft = '8px';
+  langSelectResult.style.maxWidth = '140px';
+  langSelectResult.innerHTML = `
+    <option value="en">EN</option>
+    <option value="de">DE</option>
+  `;
+  langSelectResult.value = currentLanguage;
+  langSelectResult.addEventListener('change', () => {
+    currentLanguage = langSelectResult.value;
+    questions = translations[currentLanguage];
+    updateQuizHeadlineAndDesc();
+    startQuiz();
+    const ts = document.getElementById('langSelectTop');
+    if (ts) ts.value = currentLanguage;
+  });
+  resultDiv.insertBefore(langSelectResult, restartBtn);
+
   restartBtn.addEventListener('click', startQuiz);
   downloadPdfBtn.addEventListener('click', downloadPDF);
 
+  // Set both language selectors to correct value on load
+  function updateLanguageToggleButtons() {
+    const ts = document.getElementById('langSelectTop');
+    const rs = document.getElementById('langSelectResult');
+    if (ts) ts.value = currentLanguage;
+    if (rs) rs.value = currentLanguage;
+  }
+  // Set headline/desc and language toggles on load
+  updateQuizHeadlineAndDesc();
+  updateLanguageToggleButtons();
   startQuiz();
 }
