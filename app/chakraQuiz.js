@@ -62,7 +62,10 @@ export function initChakraQuiz(containerId) {
       if (typeof answerText === 'string' && answerText.length > 0) {
         const btn = document.createElement('button');
         btn.id = `btn${idx}`;
-        btn.textContent = answerText;
+        btn.className = 'answer-btn';
+        btn.type = 'button';
+        btn.textContent = `${l}. ${answerText}`;
+        btn.setAttribute('aria-label', 'Answer ' + (idx + 1));
         btn.addEventListener('click', () => answer(idx));
         answersDiv.appendChild(btn);
       }
@@ -75,17 +78,20 @@ export function initChakraQuiz(containerId) {
   const langSelectTop = document.createElement('select');
   langSelectTop.id = 'langSelectTop';
   langSelectTop.className = 'restart-btn';
-  langSelectTop.style.position = 'absolute';
-  langSelectTop.style.top = '10px';
-  langSelectTop.style.right = '10px';
+  langSelectTop.style.position = 'fixed';
+  langSelectTop.style.top = 'max(10px, env(safe-area-inset-top))';
+  langSelectTop.style.right = 'max(10px, env(safe-area-inset-right))';
   langSelectTop.style.margin = '0';
-  langSelectTop.style.maxWidth = '140px';
+  langSelectTop.style.maxWidth = '80px';
+  langSelectTop.style.minWidth = '60px';
+  langSelectTop.style.fontSize = '0.8rem';
+  langSelectTop.style.padding = '2px 4px';
   langSelectTop.style.zIndex = '1000';
   langSelectTop.innerHTML = `
     <option value="en">EN</option>
     <option value="de">DE</option>
   `;
-
+  
   langSelectTop.value = currentLanguage;
   langSelectTop.addEventListener('change', () => {
     currentLanguage = langSelectTop.value;
@@ -267,53 +273,46 @@ export function initChakraQuiz(containerId) {
       letter-spacing: 0.01em;
     }
     .question {
-      font-size: 1.28rem;
-      font-weight: 500;
-      margin-bottom: 22px;
-      color: #334155;
-      min-height: 58px;
-      line-height: 1.35;
+      ont-size: 1.22rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #111827; /* starker Text */
+      line-height: 1.45;
+      background: #f8fafc; /* leichte Karte */
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px 16px;
     }
     .answers {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 12px;
       width: 100%;
       max-width: 100%;
     }
+
     .answers button {
-      background: linear-gradient(90deg, #f1f5f9 0%, #e0e7ef 100%);
+      background: linear-gradient(180deg, #f8fafc, #eef2f7);
       border: 1px solid #e5e7eb;
       border-radius: 14px;
-      padding: 14px 18px;
+      padding: 16px 18px;
       font-size: 1.05rem;
-      font-weight: 500;
-      color: #374151;
+      font-weight: 400;
+      color: #111827; /* voller Kontrast */
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(44,62,80,0.04);
-      transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      user-select: none;
-      will-change: transform;
+      transition: transform 0.06s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+      text-align: left;
+      letter-spacing: 0.01em;
+      min-height: 48px;
       width: 100%;
       max-width: 100%;
       box-sizing: border-box;
     }
-    .answers button:hover {
-      background: #e0e7ef;
-      color: #6366f1;
-      border-color: #c7d2fe;
-      box-shadow: 0 2px 8px rgba(99,102,241,0.07);
-    }
-    .answers button:active {
-      background: #f1f5f9;
-      color: #6366f1;
-      border-color: #c7d2fe;
-      box-shadow: none;
-    }
+    .answers button:hover { box-shadow: 0 4px 14px rgba(99,102,241,0.12); border-color: #c7d2fe; color: #4f46e5; }
+    .answers button:active { transform: scale(0.995); }
+    .answers button:focus-visible { outline: 3px solid #c7d2fe; outline-offset: 2px; border-color: #6366f1; }
+    
     .result {
       display: none;
       background: linear-gradient(120deg, #f9fafb 0%, #f1f5f9 100%);
@@ -400,6 +399,17 @@ export function initChakraQuiz(containerId) {
         padding: 18px 4vw;
       }
     }
+    @media (max-width: 480px) {
+       #chakraChart {
+         width: 100vw !important;
+         min-width: 0 !important;
+         max-width: 100vw !important;
+         height: auto !important;
+       }
+     }
+    @media (min-width: 740px) {
+      .answers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     @media (max-width: 700px) {
       #${containerId} {
         max-width: 100vw;
@@ -413,9 +423,10 @@ export function initChakraQuiz(containerId) {
         gap: 10px;
       }
       .question {
-        font-size: 1.05rem;
-        min-height: 30px;
-        margin-bottom: 8px;
+        font-size: 1.06rem;
+        min-height: unset;
+        margin-bottom: 10px;
+        padding: 12px 12px;
       }
       #chakraChart {
         padding: 8px;
@@ -440,9 +451,10 @@ export function initChakraQuiz(containerId) {
         margin-bottom: 6px;
       }
       .answers button {
-        padding: 9px 8px;
-        font-size: 0.93rem;
-        border-radius: 8px;
+        padding: 12px 12px;
+        font-size: 0.98rem;
+        border-radius: 12px;
+        min-height: 48px;
       }
       .answers {
         gap: 7px;
@@ -450,6 +462,10 @@ export function initChakraQuiz(containerId) {
       .progress {
         height: 8px;
         border-radius: 6px;
+        margin-bottom: 12px;
+        position: sticky;
+        top: env(safe-area-inset-top, 0);
+        z-index: 10;
       }
       .progress-bar {
         height: 8px;
@@ -524,6 +540,21 @@ export function initChakraQuiz(containerId) {
         min-width: 0 !important;
         max-width: 100vw !important;
       }
+    }
+           .download-pdf-btn {
+       margin-top: 12px;
+     }
+    /* Compact language selectors (top + result) */
+      #langSelectTop {
+  width: auto;
+  min-width: 60px;
+  max-width: 80px;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+}
+
+
+}
     }
   `;
   document.head.appendChild(style);
